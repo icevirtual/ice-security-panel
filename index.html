@@ -220,6 +220,13 @@
 
   <script>
     const API_BASE = "https://ice-security-backend.onrender.com/api";
+    const urlParams = new URLSearchParams(window.location.search);
+    const ownerId = urlParams.get('id') || localStorage.getItem('ice_sec_owner_id') || "";
+
+    if (urlParams.get('id')) {
+      localStorage.setItem('ice_sec_owner_id', urlParams.get('id'));
+    }
+
     let activeMode = "lockdown";
     let whitelist = [];
     let currentLogs = [];
@@ -263,7 +270,7 @@
         }
       });
 
-      localStorage.setItem('ice_sec_mode', mode);
+      localStorage.setItem(`ice_sec_mode_${ownerId}`, mode);
       if (shouldSync) saveSettingsDirectly();
     }
 
@@ -306,7 +313,7 @@
         btn.onclick = (e) => {
           const idx = parseInt(e.currentTarget.getAttribute('data-index'));
           whitelist.splice(idx, 1);
-          localStorage.setItem('ice_sec_whitelist', JSON.stringify(whitelist));
+          localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
           renderWhitelist();
           saveSettingsDirectly();
         };
@@ -329,8 +336,14 @@
     }
 
     async function saveSettingsDirectly() {
+      if (!ownerId) {
+        showToast("No Orb linked! Touch your Orb in-world.", "error");
+        return;
+      }
+
       const enableCd = document.getElementById('chk-enable-countdown').checked ? 1 : 0;
       const payload = {
+        ownerId: ownerId,
         mode: activeMode,
         enableCountdown: enableCd,
         countdown: Number(document.getElementById('countdown-range').value),
@@ -343,11 +356,11 @@
         whitelist: whitelist
       };
 
-      localStorage.setItem('ice_sec_settings', JSON.stringify(payload));
-      localStorage.setItem('ice_sec_whitelist', JSON.stringify(whitelist));
+      localStorage.setItem(`ice_sec_settings_${ownerId}`, JSON.stringify(payload));
+      localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
 
       try {
-        const res = await fetch(`${API_BASE}/settings`, {
+        const res = await fetch(`${API_BASE}/settings?id=${ownerId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -362,9 +375,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const savedMode = localStorage.getItem('ice_sec_mode') || 'lockdown';
-      const savedSettings = JSON.parse(localStorage.getItem('ice_sec_settings') || '{}');
-      whitelist = JSON.parse(localStorage.getItem('ice_sec_whitelist') || '[]');
+      const savedMode = localStorage.getItem(`ice_sec_mode_${ownerId}`) || 'lockdown';
+      const savedSettings = JSON.parse(localStorage.getItem(`ice_sec_settings_${ownerId}`) || '{}');
+      whitelist = JSON.parse(localStorage.getItem(`ice_sec_whitelist_${ownerId}`) || '[]');
 
       setModeUI(savedMode, false);
       renderWhitelist();
@@ -409,7 +422,7 @@
         const val = input.value.trim();
         if (val && !whitelist.includes(val)) {
           whitelist.push(val);
-          localStorage.setItem('ice_sec_whitelist', JSON.stringify(whitelist));
+          localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
           renderWhitelist();
           input.value = '';
           saveSettingsDirectly();
@@ -442,7 +455,7 @@
           const res = await fetch(`${API_BASE}/test-discord`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ webhookUrl: url })
+            body: JSON.stringify({ webhookUrl: url, ownerId: ownerId })
           });
           const data = await res.json();
           if (data.status === 'success') showToast("Discord ping verified!");
@@ -463,8 +476,9 @@
       };
 
       const fetchLiveData = async () => {
+        if (!ownerId) return;
         try {
-          const res = await fetch(`${API_BASE}/settings`);
+          const res = await fetch(`${API_BASE}/settings?id=${ownerId}`);
           const data = await res.json();
           if (data.status === 'success') {
             document.getElementById('parcel-name').innerText = data.parcelName;
