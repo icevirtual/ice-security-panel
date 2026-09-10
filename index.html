@@ -29,14 +29,20 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <span id="device-status" class="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online
+      <span id="device-status" class="flex items-center gap-1.5 text-xs bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/20">
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span> Connecting...
       </span>
       <button onclick="toggleMobileModal()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center gap-2">
         <i class="fa-solid fa-qrcode"></i> <span class="hidden sm:inline">Phone Sync</span>
       </button>
     </div>
   </header>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 glass-card px-4 py-3 rounded-xl border text-xs font-semibold flex items-center gap-2 shadow-2xl">
+    <span id="toast-icon"></span>
+    <span id="toast-text"></span>
+  </div>
 
   <!-- Main Container -->
   <main class="w-full max-w-4xl space-y-6">
@@ -46,17 +52,17 @@
       <div class="glass-card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
         <div>
           <span class="text-xs uppercase font-semibold tracking-wider text-cyan-400">Active Parcel</span>
-          <h2 id="parcel-name" class="text-xl font-bold text-white mt-1">Checking connection...</h2>
-          <p id="parcel-sim" class="text-xs text-slate-400 mt-1">Region: Pending Sync</p>
+          <h2 id="parcel-name" class="text-xl font-bold text-white mt-1">Awaiting In-World Orb...</h2>
+          <p id="parcel-sim" class="text-xs text-slate-400 mt-1">Region: Offline</p>
         </div>
         <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-800">
-          <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition flex items-center gap-2">
+          <button id="btn-mode-lockdown" onclick="setMode('lockdown')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-cyan-600 text-white transition flex items-center gap-2">
             <i class="fa-solid fa-lock"></i> Lockdown
           </button>
-          <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2">
+          <button id="btn-mode-tracker" onclick="setMode('tracker')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2">
             <i class="fa-solid fa-chart-line"></i> Visitor Tracker Only
           </button>
-          <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30 transition flex items-center gap-2">
+          <button id="btn-mode-disarmed" onclick="setMode('disarmed')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30 transition flex items-center gap-2">
             <i class="fa-solid fa-power-off"></i> Disarm
           </button>
         </div>
@@ -91,7 +97,7 @@
             <span id="countdown-val" class="text-cyan-400 font-bold">10s</span>
           </div>
           <input type="range" min="0" max="30" step="5" value="10" id="countdown-range" 
-                 oninput="document.getElementById('countdown-val').innerText = this.value == 0 ? 'Instant (0s)' : this.value + 's'"
+                 oninput="updateCountdownLabel(this.value)"
                  class="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
           <div class="flex justify-between text-[10px] text-slate-500 mt-1">
             <span>Instant</span>
@@ -104,7 +110,7 @@
         <!-- Action Mode -->
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1.5">Action on Expire</label>
-          <select class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-cyan-400 outline-none">
+          <select id="action-select" class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-cyan-400 outline-none">
             <option value="eject">Eject from Parcel</option>
             <option value="teleport">Teleport Home</option>
             <option value="ban">Parcel Ban + Eject</option>
@@ -117,11 +123,11 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-[11px] text-slate-400">Min Height (m)</label>
-              <input type="number" step="0.05" value="1.20" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
+              <input type="number" step="0.05" id="min-height" value="1.20" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
             </div>
             <div>
               <label class="text-[11px] text-slate-400">Max Height (m)</label>
-              <input type="number" step="0.05" value="2.10" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
+              <input type="number" step="0.05" id="max-height" value="2.10" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
             </div>
           </div>
         </div>
@@ -129,7 +135,7 @@
         <!-- Min Age -->
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1">Min Avatar Age (Days)</label>
-          <input type="number" value="14" placeholder="e.g. 14 days" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none">
+          <input type="number" id="min-age" value="14" placeholder="e.g. 14 days" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none">
         </div>
       </div>
 
@@ -141,27 +147,27 @@
         
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1.5">Discord Webhook URL</label>
-          <input type="text" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-400 outline-none font-mono">
+          <input type="text" id="discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-400 outline-none font-mono">
           <p class="text-[11px] text-slate-500 mt-1">Real-time mobile pushes when an intruder is ejected or a guest enters.</p>
         </div>
 
         <div class="space-y-2 pt-2">
           <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" checked class="accent-indigo-500 rounded">
+            <input type="checkbox" id="chk-alert-intrusion" checked class="accent-indigo-500 rounded">
             Alert on unauthorized intrusion
           </label>
           <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" checked class="accent-indigo-500 rounded">
+            <input type="checkbox" id="chk-daily-report" checked class="accent-indigo-500 rounded">
             Send daily visitor report
           </label>
           <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" class="accent-indigo-500 rounded">
+            <input type="checkbox" id="chk-avatar-photo" class="accent-indigo-500 rounded">
             Include avatar profile photo in embed
           </label>
         </div>
 
-        <button class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition shadow-lg shadow-indigo-600/20">
-          Test Discord Webhook
+        <button onclick="testDiscordWebhook()" id="btn-test-discord" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Test Discord Webhook
         </button>
       </div>
 
@@ -185,23 +191,15 @@
       </div>
 
       <!-- Current Whitelist Tags -->
-      <div id="whitelist-tags" class="flex flex-wrap gap-2 pt-2">
-        <span class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl">
-          wenious Resident (Owner)
-        </span>
-        <span class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl">
-          ice.system (Manager)
-          <button class="text-slate-500 hover:text-rose-400 text-xs ml-1">&times;</button>
-        </span>
-      </div>
+      <div id="whitelist-tags" class="flex flex-wrap gap-2 pt-2"></div>
     </div>
 
     <!-- Save Bar -->
     <div class="sticky bottom-4 w-full">
       <div class="glass-card rounded-2xl p-3 border border-cyan-500/30 flex items-center justify-between shadow-2xl bg-slate-900/90">
         <span class="text-xs text-slate-400 pl-2">Changes apply to in-world orb automatically.</span>
-        <button class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs tracking-wide shadow-lg shadow-cyan-500/20 hover:opacity-95 transition">
-          Sync with Orb
+        <button onclick="saveAllSettings()" id="btn-sync" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs tracking-wide shadow-lg shadow-cyan-500/20 hover:opacity-95 transition flex items-center gap-2">
+          <i class="fa-solid fa-rotate"></i> Sync with Orb
         </button>
       </div>
     </div>
@@ -226,26 +224,190 @@
   </div>
 
   <script>
+    const API_BASE = "https://ice-security-backend.onrender.com/api";
+    let activeMode = "lockdown";
+    let whitelist = [];
+
+    function showToast(text, type = "success") {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toast-text');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastText.innerText = text;
+      if (type === "success") {
+        toast.className = "fixed top-5 right-5 z-50 glass-card px-4 py-3 rounded-xl border border-emerald-500/40 bg-slate-900/90 text-emerald-400 text-xs font-semibold flex items-center gap-2 shadow-2xl transition-all duration-300";
+        toastIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+      } else {
+        toast.className = "fixed top-5 right-5 z-50 glass-card px-4 py-3 rounded-xl border border-rose-500/40 bg-slate-900/90 text-rose-400 text-xs font-semibold flex items-center gap-2 shadow-2xl transition-all duration-300";
+        toastIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+      }
+      toast.style.transform = "translateY(0)";
+      toast.style.opacity = "1";
+
+      setTimeout(() => {
+        toast.style.transform = "translateY(-100px)";
+        toast.style.opacity = "0";
+      }, 3500);
+    }
+
     function toggleMobileModal() {
       const modal = document.getElementById('qr-modal');
       modal.classList.toggle('hidden');
-      // Update dynamic QR to current page URL
       document.getElementById('qr-image').src = 
         `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`;
     }
 
+    function updateCountdownLabel(val) {
+      document.getElementById('countdown-val').innerText = val == 0 ? 'Instant (0s)' : val + 's';
+    }
+
+    function setMode(mode) {
+      activeMode = mode;
+      const modes = {
+        lockdown: { id: 'btn-mode-lockdown', active: 'bg-cyan-600 text-white', inactive: 'bg-slate-800 text-slate-300' },
+        tracker: { id: 'btn-mode-tracker', active: 'bg-cyan-600 text-white', inactive: 'bg-slate-800 text-slate-300' },
+        disarmed: { id: 'btn-mode-disarmed', active: 'bg-rose-600 text-white', inactive: 'bg-rose-600/20 text-rose-400 border border-rose-500/30' }
+      };
+
+      Object.keys(modes).forEach(k => {
+        const btn = document.getElementById(modes[k].id);
+        if (k === mode) {
+          btn.className = `px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 ${modes[k].active}`;
+        } else {
+          btn.className = `px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 ${modes[k].inactive}`;
+        }
+      });
+    }
+
+    function renderWhitelist() {
+      const container = document.getElementById('whitelist-tags');
+      container.innerHTML = '';
+      whitelist.forEach((name, idx) => {
+        const tag = document.createElement('span');
+        tag.className = "inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl";
+        tag.innerHTML = `${name} <button onclick="removeWhitelist(${idx})" class="text-slate-500 hover:text-rose-400 text-xs ml-1">&times;</button>`;
+        container.appendChild(tag);
+      });
+    }
+
     function addWhitelist() {
       const input = document.getElementById('avatar-input');
-      if(!input.value.trim()) return;
-      
-      const container = document.getElementById('whitelist-tags');
-      const tag = document.createElement('span');
-      tag.className = "inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl";
-      tag.innerHTML = `${input.value.trim()} <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 text-xs ml-1">&times;</button>`;
-      
-      container.appendChild(tag);
+      const val = input.value.trim();
+      if (!val) return;
+      if (!whitelist.includes(val)) {
+        whitelist.push(val);
+        renderWhitelist();
+      }
       input.value = '';
     }
+
+    function removeWhitelist(idx) {
+      whitelist.splice(idx, 1);
+      renderWhitelist();
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await fetch(`${API_BASE}/settings`);
+        const data = await res.json();
+        if (data.status === "success") {
+          document.getElementById('parcel-name').innerText = data.parcelName;
+          document.getElementById('parcel-sim').innerText = `Region: ${data.region}`;
+
+          const statusBadge = document.getElementById('device-status');
+          if (data.region !== "Offline") {
+            statusBadge.className = "flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20";
+            statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online';
+          }
+
+          const s = data.settings;
+          setMode(s.mode || 'lockdown');
+          document.getElementById('countdown-range').value = s.countdown ?? 10;
+          updateCountdownLabel(s.countdown ?? 10);
+          document.getElementById('action-select').value = s.action || 'eject';
+          document.getElementById('min-height').value = s.minHeight ?? 1.20;
+          document.getElementById('max-height').value = s.maxHeight ?? 2.10;
+          document.getElementById('min-age').value = s.minAge ?? 14;
+          document.getElementById('discord-webhook').value = s.discordWebhook || '';
+          whitelist = s.whitelist || [];
+          renderWhitelist();
+        }
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+    }
+
+    async function saveAllSettings() {
+      const btn = document.getElementById('btn-sync');
+      const oldHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+      btn.disabled = true;
+
+      const payload = {
+        mode: activeMode,
+        countdown: Number(document.getElementById('countdown-range').value),
+        action: document.getElementById('action-select').value,
+        minHeight: Number(document.getElementById('min-height').value),
+        maxHeight: Number(document.getElementById('max-height').value),
+        minAge: Number(document.getElementById('min-age').value),
+        discordWebhook: document.getElementById('discord-webhook').value.trim(),
+        whitelist: whitelist
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/settings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          showToast("Settings synchronized successfully!");
+        } else {
+          showToast("Sync failed. Check connection.", "error");
+        }
+      } catch (err) {
+        showToast("Error connecting to server.", "error");
+      } finally {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      }
+    }
+
+    async function testDiscordWebhook() {
+      const webhookUrl = document.getElementById('discord-webhook').value.trim();
+      if (!webhookUrl) {
+        showToast("Please enter a Discord Webhook URL first.", "error");
+        return;
+      }
+
+      const btn = document.getElementById('btn-test-discord');
+      const oldHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/test-discord`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ webhookUrl })
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          showToast("Discord test notification sent!");
+        } else {
+          showToast("Discord returned an error. Check URL.", "error");
+        }
+      } catch (err) {
+        showToast("Failed to reach backend.", "error");
+      } finally {
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
+      }
+    }
+
+    // Initialize on page load
+    loadSettings();
   </script>
 </body>
 </html>
