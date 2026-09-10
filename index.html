@@ -17,7 +17,6 @@
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col items-center p-4 sm:p-6 select-none selection:bg-cyan-500 selection:text-black">
 
-  <!-- Header -->
   <header class="w-full max-w-4xl flex items-center justify-between py-4 border-b border-slate-800 mb-6">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
@@ -38,16 +37,13 @@
     </div>
   </header>
 
-  <!-- Notification Toast -->
   <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120px] opacity-0 glass-card px-4 py-3 rounded-xl border text-xs font-semibold flex items-center gap-2 shadow-2xl">
     <span id="toast-icon"></span>
     <span id="toast-text"></span>
   </div>
 
-  <!-- Main Container -->
   <main class="w-full max-w-4xl space-y-6">
 
-    <!-- Status & Fast Mode Switch -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="glass-card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
         <div>
@@ -68,7 +64,6 @@
         </div>
       </div>
 
-      <!-- Quick Metrics -->
       <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
         <span class="text-xs uppercase font-semibold tracking-wider text-slate-400">Total Visits (24h)</span>
         <div class="my-2">
@@ -81,16 +76,13 @@
       </div>
     </div>
 
-    <!-- Rule & Behavior Settings -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-      <!-- Enforcement Settings -->
       <div class="glass-card rounded-2xl p-6 space-y-5">
         <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <i class="fa-solid fa-sliders text-cyan-400"></i> Defense Parameters
         </h3>
 
-        <!-- Countdown Delay + Toggle Checkbox -->
         <div>
           <div class="flex items-center justify-between mb-2">
             <label class="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer">
@@ -112,7 +104,6 @@
           </div>
         </div>
 
-        <!-- Action Mode -->
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1.5">Action on Expire</label>
           <select id="action-select" class="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-cyan-400 outline-none cursor-pointer">
@@ -122,7 +113,6 @@
           </select>
         </div>
 
-        <!-- Group Exemption Checkbox -->
         <div class="pt-2">
           <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
             <input type="checkbox" id="chk-group-pass" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer">
@@ -130,7 +120,6 @@
           </label>
         </div>
 
-        <!-- Height Filter -->
         <div class="pt-3 border-t border-slate-800">
           <div class="flex items-center justify-between mb-2">
             <label class="flex items-center gap-3 text-xs font-semibold text-cyan-400 cursor-pointer select-none">
@@ -151,7 +140,6 @@
         </div>
       </div>
 
-      <!-- Discord & Webhook Integration -->
       <div class="glass-card rounded-2xl p-6 space-y-5">
         <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <i class="fa-brands fa-discord text-indigo-400"></i> Discord Alerts
@@ -170,7 +158,6 @@
 
     </div>
 
-    <!-- Whitelist & Access Management -->
     <div class="glass-card rounded-2xl p-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
@@ -187,11 +174,9 @@
         </div>
       </div>
 
-      <!-- Current Whitelist Tags -->
       <div id="whitelist-tags" class="flex flex-wrap gap-2 pt-2"></div>
     </div>
 
-    <!-- Save Bar -->
     <div class="sticky bottom-4 w-full">
       <div class="glass-card rounded-2xl p-3 border border-cyan-500/30 flex items-center justify-between shadow-2xl bg-slate-900/90">
         <span class="text-xs text-slate-400 pl-2">Syncs with in-world orb automatically on change.</span>
@@ -203,7 +188,6 @@
 
   </main>
 
-  <!-- Visitor Logs Modal -->
   <div id="visitor-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="glass-card bg-slate-900 border border-slate-700 max-w-md w-full rounded-2xl p-6 space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -221,7 +205,6 @@
     </div>
   </div>
 
-  <!-- Mobile Sync QR Modal -->
   <div id="qr-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="glass-card bg-slate-900 border border-slate-700 max-w-sm w-full rounded-2xl p-6 text-center space-y-4">
       <h3 class="text-base font-bold text-white">Scan for Mobile Studio</h3>
@@ -379,7 +362,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. LocalStorage Yükle
       const savedMode = localStorage.getItem('ice_sec_mode') || 'lockdown';
       const savedSettings = JSON.parse(localStorage.getItem('ice_sec_settings') || '{}');
       whitelist = JSON.parse(localStorage.getItem('ice_sec_whitelist') || '[]');
@@ -403,12 +385,10 @@
       if (savedSettings.discordWebhook) document.getElementById('discord-webhook').value = savedSettings.discordWebhook;
       updateHeightUI();
 
-      // 2. Mod Butonları
       document.getElementById('btn-mode-lockdown').onclick = () => setModeUI('lockdown', true);
       document.getElementById('btn-mode-tracker').onclick = () => setModeUI('tracker', true);
       document.getElementById('btn-mode-disarmed').onclick = () => setModeUI('disarmed', true);
 
-      // 3. Countdown Eventleri
       document.getElementById('chk-enable-countdown').onchange = () => {
         updateCountdownUI();
         saveSettingsDirectly();
@@ -417,7 +397,6 @@
       range.oninput = () => updateCountdownUI();
       range.onchange = () => saveSettingsDirectly();
 
-      // 4. Diğer Ayarlar
       document.getElementById('chk-enable-height').onchange = () => {
         updateHeightUI();
         saveSettingsDirectly();
@@ -425,7 +404,6 @@
       document.getElementById('chk-group-pass').onchange = () => saveSettingsDirectly();
       document.getElementById('action-select').onchange = () => saveSettingsDirectly();
 
-      // 5. Whitelist
       document.getElementById('btn-add-whitelist').onclick = () => {
         const input = document.getElementById('avatar-input');
         const val = input.value.trim();
@@ -438,7 +416,6 @@
         }
       };
 
-      // 6. Visitor Modal
       const visitorModal = document.getElementById('visitor-modal');
       document.getElementById('btn-view-visitors').onclick = () => {
         renderVisitorModal();
@@ -447,7 +424,6 @@
       document.getElementById('btn-close-visitor').onclick = () => visitorModal.classList.add('hidden');
       document.getElementById('btn-close-visitor-footer').onclick = () => visitorModal.classList.add('hidden');
 
-      // 7. QR Sync
       const qrModal = document.getElementById('qr-modal');
       document.getElementById('btn-phone-sync').onclick = () => {
         document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`;
@@ -455,7 +431,6 @@
       };
       document.getElementById('btn-close-qr').onclick = () => qrModal.classList.add('hidden');
 
-      // 8. Discord Test
       document.getElementById('btn-test-discord').onclick = async () => {
         const url = document.getElementById('discord-webhook').value.trim();
         if (!url) {
@@ -477,7 +452,6 @@
         }
       };
 
-      // 9. Manuel Sync
       document.getElementById('btn-sync').onclick = async () => {
         const btn = document.getElementById('btn-sync');
         const oldHtml = btn.innerHTML;
@@ -488,7 +462,6 @@
         btn.disabled = false;
       };
 
-      // 10. Canlı Veri Çekme (Poll/Load)
       const fetchLiveData = async () => {
         try {
           const res = await fetch(`${API_BASE}/settings`);
@@ -509,7 +482,7 @@
       };
 
       fetchLiveData();
-      setInterval(fetchLiveData, 5000); // 5 saniyede bir ziyaretçileri otomatik tazele
+      setInterval(fetchLiveData, 5000);
     });
   </script>
 </body>
