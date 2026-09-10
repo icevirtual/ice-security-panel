@@ -44,7 +44,6 @@
 
   <main class="w-full max-w-4xl space-y-6">
 
-    <!-- Active Parcel, Live Radar & Metrics -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="glass-card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
         <div>
@@ -77,7 +76,7 @@
       </div>
     </div>
 
-    <!-- Live In-World Radar Presence -->
+    <!-- Live Parcel Radar with Remote Kick -->
     <div class="glass-card rounded-2xl p-5">
       <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
         <div class="flex items-center gap-2">
@@ -91,7 +90,6 @@
       </div>
     </div>
 
-    <!-- Defense & Discord Parameters -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
       <div class="glass-card rounded-2xl p-6 space-y-5">
@@ -174,7 +172,6 @@
 
     </div>
 
-    <!-- Whitelist Management -->
     <div class="glass-card rounded-2xl p-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
@@ -194,7 +191,6 @@
       <div id="whitelist-tags" class="flex flex-wrap gap-2 pt-2"></div>
     </div>
 
-    <!-- Bottom Action Bar -->
     <div class="sticky bottom-4 w-full">
       <div class="glass-card rounded-2xl p-3 border border-cyan-500/30 flex items-center justify-between shadow-2xl bg-slate-900/90">
         <span class="text-xs text-slate-400 pl-2">Syncs with in-world orb automatically on change.</span>
@@ -206,7 +202,6 @@
 
   </main>
 
-  <!-- Visitor History Modal -->
   <div id="visitor-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="glass-card bg-slate-900 border border-slate-700 max-w-md w-full rounded-2xl p-6 space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -224,7 +219,6 @@
     </div>
   </div>
 
-  <!-- QR Sync Modal -->
   <div id="qr-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="glass-card bg-slate-900 border border-slate-700 max-w-sm w-full rounded-2xl p-6 text-center space-y-4">
       <h3 class="text-base font-bold text-white">Scan for Mobile Studio</h3>
@@ -340,6 +334,7 @@
       });
     }
 
+    // Live Presence with Kick Action
     function renderLiveRadar(avatars) {
       const container = document.getElementById('live-avatars-container');
       const counter = document.getElementById('live-count');
@@ -352,12 +347,39 @@
 
       container.innerHTML = '';
       avatars.forEach(name => {
-        const badge = document.createElement('span');
-        badge.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium";
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${name}`;
+        const badge = document.createElement('div');
+        badge.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium text-xs";
+        badge.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 
+          <span>${name}</span>
+          <button onclick="kickAvatar('${name}')" title="Kick Avatar" class="ml-1 text-rose-400 hover:text-rose-300 hover:scale-110 transition cursor-pointer">
+            <i class="fa-solid fa-user-xmark"></i>
+          </button>
+        `;
         container.appendChild(badge);
       });
     }
+
+    window.kickAvatar = async function(avatarName) {
+      if (!confirm(`Are you sure you want to kick ${avatarName} from parcel?`)) return;
+
+      showToast(`Ejecting ${avatarName}...`);
+      try {
+        const res = await fetch(`${API_BASE}/manual-action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ownerId: ownerId, targetName: avatarName })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          showToast(`${avatarName} kicked successfully!`);
+        } else {
+          showToast(`Failed: Avatar not on parcel or orb offline`, 'error');
+        }
+      } catch (err) {
+        showToast("Backend connection error", "error");
+      }
+    };
 
     function renderVisitorModal() {
       const box = document.getElementById('visitor-list-container');
@@ -514,7 +536,6 @@
         btn.disabled = false;
       };
 
-      // 3 saniyede bir hem ayarları hem CANLI RADAR listesini çeker
       const fetchLiveData = async () => {
         if (!ownerId) return;
         try {
@@ -529,7 +550,6 @@
             if (data.visitorLogs) {
               currentLogs = data.visitorLogs;
             }
-            // Canlı radar çizimi
             if (data.onlineAvatars !== undefined) {
               renderLiveRadar(data.onlineAvatars);
             }
