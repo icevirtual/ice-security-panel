@@ -13,9 +13,6 @@
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .custom-switch:checked {
-      background-color: #06b6d4;
-    }
   </style>
 </head>
 <body class="text-slate-200 min-h-screen flex flex-col items-center p-4 sm:p-6 select-none selection:bg-cyan-500 selection:text-black">
@@ -78,8 +75,8 @@
           <span id="visit-count" class="text-3xl font-extrabold text-white tracking-tight">0</span>
           <span class="text-xs text-slate-400 block mt-1">Unique avatars detected</span>
         </div>
-        <button class="w-full py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
-          View Detailed Logs
+        <button onclick="showToast('Live tracking feed connected')" class="w-full py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
+          Live Status Active
         </button>
       </div>
     </div>
@@ -93,7 +90,7 @@
           <i class="fa-solid fa-sliders text-cyan-400"></i> Defense Parameters
         </h3>
 
-        <!-- Countdown Delay -->
+        <!-- Countdown Delay (Off / Instant Included) -->
         <div>
           <div class="flex justify-between text-xs mb-1.5 font-medium">
             <span class="text-slate-300">Countdown Warning</span>
@@ -102,7 +99,7 @@
           <input type="range" min="0" max="30" step="5" value="10" id="countdown-range" 
                  class="w-full accent-cyan-400 bg-slate-800 h-2 rounded-lg cursor-pointer">
           <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-            <span>Instant (0s)</span>
+            <span class="text-cyan-400 font-medium">Off (0s)</span>
             <span>10s</span>
             <span>20s</span>
             <span>30s</span>
@@ -233,7 +230,6 @@
     let activeMode = "lockdown";
     let whitelist = [];
 
-    // --- Toast Function ---
     function showToast(text, type = "success") {
       const toast = document.getElementById('toast');
       const toastText = document.getElementById('toast-text');
@@ -256,7 +252,6 @@
       }, 3500);
     }
 
-    // --- Mode Buttons UI ---
     function setModeUI(mode) {
       activeMode = mode;
       const modes = ['lockdown', 'tracker', 'disarmed'];
@@ -275,7 +270,6 @@
       });
     }
 
-    // --- Height Toggle UI ---
     function updateHeightUI() {
       const isChecked = document.getElementById('chk-enable-height').checked;
       const box = document.getElementById('height-inputs-box');
@@ -286,7 +280,10 @@
       }
     }
 
-    // --- Whitelist Rendering ---
+    function updateCountdownLabel(val) {
+      document.getElementById('countdown-val').innerText = (val == 0) ? 'Off (Instant)' : val + 's';
+    }
+
     function renderWhitelist() {
       const container = document.getElementById('whitelist-tags');
       container.innerHTML = '';
@@ -306,7 +303,6 @@
       });
     }
 
-    // --- Bind All Events (Tıklamaları Canlandır) ---
     document.addEventListener('DOMContentLoaded', () => {
       // 1. Mode Selectors
       document.getElementById('btn-mode-lockdown').onclick = () => setModeUI('lockdown');
@@ -315,10 +311,7 @@
 
       // 2. Countdown Range
       const range = document.getElementById('countdown-range');
-      range.oninput = (e) => {
-        const val = e.target.value;
-        document.getElementById('countdown-val').innerText = val == 0 ? 'Instant (0s)' : val + 's';
-      };
+      range.oninput = (e) => updateCountdownLabel(e.target.value);
 
       // 3. Height Checkbox
       document.getElementById('chk-enable-height').onchange = updateHeightUI;
@@ -403,7 +396,7 @@
         }
       };
 
-      // Fetch Initial Settings from Backend
+      // Backend veri senkronizasyonu
       (async () => {
         try {
           const res = await fetch(`${API_BASE}/settings`);
@@ -411,11 +404,15 @@
           if (data.status === 'success') {
             document.getElementById('parcel-name').innerText = data.parcelName;
             document.getElementById('parcel-sim').innerText = `Region: ${data.region}`;
+            if (data.totalVisits !== undefined) {
+              document.getElementById('visit-count').innerText = data.totalVisits;
+            }
+
             const s = data.settings;
             if (s) {
               setModeUI(s.mode || 'lockdown');
               document.getElementById('countdown-range').value = s.countdown ?? 10;
-              document.getElementById('countdown-val').innerText = (s.countdown == 0 ? 'Instant (0s)' : (s.countdown || 10) + 's');
+              updateCountdownLabel(s.countdown ?? 10);
               document.getElementById('action-select').value = s.action || 'eject';
               document.getElementById('chk-group-pass').checked = s.enableGroupPass === 1;
               document.getElementById('chk-enable-height').checked = s.enableHeight === 1;
@@ -428,16 +425,10 @@
             }
           }
         } catch (e) {
-          console.log("Using local default state until backend responds.");
+          console.log("Offline mode fallback");
         }
       })();
     });
   </script>
 </body>
 </html>
-<div class="flex justify-between text-[10px] text-slate-500 mt-1">
-  <span>Off (0s)</span>
-  <span>10s</span>
-  <span>20s</span>
-  <span>30s</span>
-</div>
