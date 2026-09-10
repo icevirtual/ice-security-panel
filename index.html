@@ -9,13 +9,16 @@
   <style>
     body { background-color: #0b0f17; }
     .glass-card {
-      background: rgba(18, 24, 38, 0.7);
+      background: rgba(18, 24, 38, 0.75);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+    .custom-switch:checked {
+      background-color: #06b6d4;
+    }
   </style>
 </head>
-<body class="text-slate-200 min-h-screen flex flex-col items-center p-4 sm:p-6 selection:bg-cyan-500 selection:text-black">
+<body class="text-slate-200 min-h-screen flex flex-col items-center p-4 sm:p-6 select-none selection:bg-cyan-500 selection:text-black">
 
   <!-- Header -->
   <header class="w-full max-w-4xl flex items-center justify-between py-4 border-b border-slate-800 mb-6">
@@ -29,17 +32,17 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <span id="device-status" class="flex items-center gap-1.5 text-xs bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/20">
-        <span class="w-2 h-2 rounded-full bg-amber-400"></span> Connecting...
+      <span id="device-status" class="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online
       </span>
-      <button onclick="toggleMobileModal()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center gap-2">
+      <button id="btn-phone-sync" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-qrcode"></i> <span class="hidden sm:inline">Phone Sync</span>
       </button>
     </div>
   </header>
 
   <!-- Notification Toast -->
-  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 glass-card px-4 py-3 rounded-xl border text-xs font-semibold flex items-center gap-2 shadow-2xl">
+  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-120px] opacity-0 glass-card px-4 py-3 rounded-xl border text-xs font-semibold flex items-center gap-2 shadow-2xl">
     <span id="toast-icon"></span>
     <span id="toast-text"></span>
   </div>
@@ -52,17 +55,17 @@
       <div class="glass-card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
         <div>
           <span class="text-xs uppercase font-semibold tracking-wider text-cyan-400">Active Parcel</span>
-          <h2 id="parcel-name" class="text-xl font-bold text-white mt-1">Awaiting In-World Orb...</h2>
-          <p id="parcel-sim" class="text-xs text-slate-400 mt-1">Region: Offline</p>
+          <h2 id="parcel-name" class="text-xl font-bold text-white mt-1">Connecting to Orb...</h2>
+          <p id="parcel-sim" class="text-xs text-slate-400 mt-1">Region: Standby</p>
         </div>
-        <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-800">
-          <button id="btn-mode-lockdown" onclick="setMode('lockdown')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-cyan-600 text-white transition flex items-center gap-2">
+        <div class="flex flex-wrap gap-2 mt-5 pt-4 border-t border-slate-800">
+          <button id="btn-mode-lockdown" class="mode-btn px-4 py-2 text-xs font-semibold rounded-xl bg-cyan-600 text-white transition flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan-600/30">
             <i class="fa-solid fa-lock"></i> Lockdown
           </button>
-          <button id="btn-mode-tracker" onclick="setMode('tracker')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2">
+          <button id="btn-mode-tracker" class="mode-btn px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2 cursor-pointer">
             <i class="fa-solid fa-chart-line"></i> Visitor Tracker Only
           </button>
-          <button id="btn-mode-disarmed" onclick="setMode('disarmed')" class="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30 transition flex items-center gap-2">
+          <button id="btn-mode-disarmed" class="mode-btn px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2 cursor-pointer">
             <i class="fa-solid fa-power-off"></i> Disarm
           </button>
         </div>
@@ -75,7 +78,7 @@
           <span id="visit-count" class="text-3xl font-extrabold text-white tracking-tight">0</span>
           <span class="text-xs text-slate-400 block mt-1">Unique avatars detected</span>
         </div>
-        <button class="w-full py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+        <button class="w-full py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
           View Detailed Logs
         </button>
       </div>
@@ -97,10 +100,9 @@
             <span id="countdown-val" class="text-cyan-400 font-bold">10s</span>
           </div>
           <input type="range" min="0" max="30" step="5" value="10" id="countdown-range" 
-                 oninput="updateCountdownLabel(this.value)"
-                 class="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+                 class="w-full accent-cyan-400 bg-slate-800 h-2 rounded-lg cursor-pointer">
           <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-            <span>Instant</span>
+            <span>Instant (0s)</span>
             <span>10s</span>
             <span>20s</span>
             <span>30s</span>
@@ -110,17 +112,30 @@
         <!-- Action Mode -->
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1.5">Action on Expire</label>
-          <select id="action-select" class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-cyan-400 outline-none">
+          <select id="action-select" class="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-cyan-400 outline-none cursor-pointer">
             <option value="eject">Eject from Parcel</option>
             <option value="teleport">Teleport Home</option>
             <option value="ban">Parcel Ban + Eject</option>
           </select>
         </div>
 
-        <!-- Height Filter (USP) -->
-        <div class="pt-3 border-t border-slate-800/80">
-          <span class="text-xs font-semibold text-cyan-400 block mb-2">Avatar Height Filter (Roleplay & Anti-Giant)</span>
-          <div class="grid grid-cols-2 gap-3">
+        <!-- Group Exemption Checkbox -->
+        <div class="pt-2">
+          <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
+            <input type="checkbox" id="chk-group-pass" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer">
+            <span>Allow Parcel Group Members (Exempt from security)</span>
+          </label>
+        </div>
+
+        <!-- Height Filter (Toggle) -->
+        <div class="pt-3 border-t border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <label class="flex items-center gap-3 text-xs font-semibold text-cyan-400 cursor-pointer select-none">
+              <input type="checkbox" id="chk-enable-height" class="w-4 h-4 accent-cyan-500 rounded cursor-pointer">
+              <span>Enable Avatar Height Filter</span>
+            </label>
+          </div>
+          <div id="height-inputs-box" class="grid grid-cols-2 gap-3 opacity-40 pointer-events-none transition-all">
             <div>
               <label class="text-[11px] text-slate-400">Min Height (m)</label>
               <input type="number" step="0.05" id="min-height" value="1.20" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
@@ -130,12 +145,6 @@
               <input type="number" step="0.05" id="max-height" value="2.10" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
             </div>
           </div>
-        </div>
-
-        <!-- Min Age -->
-        <div>
-          <label class="text-xs font-medium text-slate-300 block mb-1">Min Avatar Age (Days)</label>
-          <input type="number" id="min-age" value="14" placeholder="e.g. 14 days" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none">
         </div>
       </div>
 
@@ -147,26 +156,22 @@
         
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1.5">Discord Webhook URL</label>
-          <input type="text" id="discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-400 outline-none font-mono">
-          <p class="text-[11px] text-slate-500 mt-1">Real-time mobile pushes when an intruder is ejected or a guest enters.</p>
+          <input type="text" id="discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-400 outline-none font-mono">
+          <p class="text-[11px] text-slate-500 mt-1">Instant mobile notifications for parcel breaches or visits.</p>
         </div>
 
         <div class="space-y-2 pt-2">
-          <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" id="chk-alert-intrusion" checked class="accent-indigo-500 rounded">
-            Alert on unauthorized intrusion
+          <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
+            <input type="checkbox" id="chk-alert-intrusion" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+            <span>Alert on unauthorized intrusion</span>
           </label>
-          <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" id="chk-daily-report" checked class="accent-indigo-500 rounded">
-            Send daily visitor report
-          </label>
-          <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-            <input type="checkbox" id="chk-avatar-photo" class="accent-indigo-500 rounded">
-            Include avatar profile photo in embed
+          <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
+            <input type="checkbox" id="chk-daily-report" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+            <span>Send daily visitor report</span>
           </label>
         </div>
 
-        <button onclick="testDiscordWebhook()" id="btn-test-discord" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2">
+        <button id="btn-test-discord" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer">
           <i class="fa-solid fa-paper-plane"></i> Test Discord Webhook
         </button>
       </div>
@@ -183,8 +188,8 @@
           <p class="text-xs text-slate-400 mt-0.5">Avatars allowed without warning or ejection.</p>
         </div>
         <div class="flex gap-2">
-          <input type="text" id="avatar-input" placeholder="Avatar Legacy Name or UUID" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-56">
-          <button onclick="addWhitelist()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition">
+          <input type="text" id="avatar-input" placeholder="Avatar Name or UUID" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-56">
+          <button id="btn-add-whitelist" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition cursor-pointer">
             Add
           </button>
         </div>
@@ -198,7 +203,7 @@
     <div class="sticky bottom-4 w-full">
       <div class="glass-card rounded-2xl p-3 border border-cyan-500/30 flex items-center justify-between shadow-2xl bg-slate-900/90">
         <span class="text-xs text-slate-400 pl-2">Changes apply to in-world orb automatically.</span>
-        <button onclick="saveAllSettings()" id="btn-sync" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs tracking-wide shadow-lg shadow-cyan-500/20 hover:opacity-95 transition flex items-center gap-2">
+        <button id="btn-sync" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs tracking-wide shadow-lg shadow-cyan-500/20 hover:opacity-95 transition flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-rotate"></i> Sync with Orb
         </button>
       </div>
@@ -217,7 +222,7 @@
              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com" alt="QR Code">
       </div>
 
-      <button onclick="toggleMobileModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs transition">
+      <button id="btn-close-qr" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs transition cursor-pointer">
         Close
       </button>
     </div>
@@ -228,6 +233,7 @@
     let activeMode = "lockdown";
     let whitelist = [];
 
+    // --- Toast Function ---
     function showToast(text, type = "success") {
       const toast = document.getElementById('toast');
       const toastText = document.getElementById('toast-text');
@@ -235,179 +241,197 @@
 
       toastText.innerText = text;
       if (type === "success") {
-        toast.className = "fixed top-5 right-5 z-50 glass-card px-4 py-3 rounded-xl border border-emerald-500/40 bg-slate-900/90 text-emerald-400 text-xs font-semibold flex items-center gap-2 shadow-2xl transition-all duration-300";
+        toast.className = "fixed top-5 right-5 z-50 glass-card px-4 py-3 rounded-xl border border-emerald-500/40 bg-slate-900 text-emerald-400 text-xs font-semibold flex items-center gap-2 shadow-2xl transition-all duration-300";
         toastIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
       } else {
-        toast.className = "fixed top-5 right-5 z-50 glass-card px-4 py-3 rounded-xl border border-rose-500/40 bg-slate-900/90 text-rose-400 text-xs font-semibold flex items-center gap-2 shadow-2xl transition-all duration-300";
+        toast.className = "fixed top-5 right-5 z-50 glass-card px-4 py-3 rounded-xl border border-rose-500/40 bg-slate-900 text-rose-400 text-xs font-semibold flex items-center gap-2 shadow-2xl transition-all duration-300";
         toastIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
       }
       toast.style.transform = "translateY(0)";
       toast.style.opacity = "1";
 
       setTimeout(() => {
-        toast.style.transform = "translateY(-100px)";
+        toast.style.transform = "translateY(-120px)";
         toast.style.opacity = "0";
       }, 3500);
     }
 
-    function toggleMobileModal() {
-      const modal = document.getElementById('qr-modal');
-      modal.classList.toggle('hidden');
-      document.getElementById('qr-image').src = 
-        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`;
-    }
-
-    function updateCountdownLabel(val) {
-      document.getElementById('countdown-val').innerText = val == 0 ? 'Instant (0s)' : val + 's';
-    }
-
-    function setMode(mode) {
+    // --- Mode Buttons UI ---
+    function setModeUI(mode) {
       activeMode = mode;
-      const modes = {
-        lockdown: { id: 'btn-mode-lockdown', active: 'bg-cyan-600 text-white', inactive: 'bg-slate-800 text-slate-300' },
-        tracker: { id: 'btn-mode-tracker', active: 'bg-cyan-600 text-white', inactive: 'bg-slate-800 text-slate-300' },
-        disarmed: { id: 'btn-mode-disarmed', active: 'bg-rose-600 text-white', inactive: 'bg-rose-600/20 text-rose-400 border border-rose-500/30' }
-      };
-
-      Object.keys(modes).forEach(k => {
-        const btn = document.getElementById(modes[k].id);
-        if (k === mode) {
-          btn.className = `px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 ${modes[k].active}`;
+      const modes = ['lockdown', 'tracker', 'disarmed'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`btn-mode-${m}`);
+        if (!btn) return;
+        if (m === mode) {
+          if (m === 'disarmed') {
+            btn.className = "mode-btn px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600 text-white transition flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-600/30";
+          } else {
+            btn.className = "mode-btn px-4 py-2 text-xs font-semibold rounded-xl bg-cyan-600 text-white transition flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan-600/30";
+          }
         } else {
-          btn.className = `px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-2 ${modes[k].inactive}`;
+          btn.className = "mode-btn px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2 cursor-pointer";
         }
       });
     }
 
+    // --- Height Toggle UI ---
+    function updateHeightUI() {
+      const isChecked = document.getElementById('chk-enable-height').checked;
+      const box = document.getElementById('height-inputs-box');
+      if (isChecked) {
+        box.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        box.classList.add('opacity-40', 'pointer-events-none');
+      }
+    }
+
+    // --- Whitelist Rendering ---
     function renderWhitelist() {
       const container = document.getElementById('whitelist-tags');
       container.innerHTML = '';
       whitelist.forEach((name, idx) => {
         const tag = document.createElement('span');
-        tag.className = "inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl";
-        tag.innerHTML = `${name} <button onclick="removeWhitelist(${idx})" class="text-slate-500 hover:text-rose-400 text-xs ml-1">&times;</button>`;
+        tag.className = "inline-flex items-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl";
+        tag.innerHTML = `<span>${name}</span> <button data-index="${idx}" class="remove-wl text-slate-400 hover:text-rose-400 cursor-pointer">&times;</button>`;
         container.appendChild(tag);
+      });
+
+      document.querySelectorAll('.remove-wl').forEach(btn => {
+        btn.onclick = (e) => {
+          const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+          whitelist.splice(idx, 1);
+          renderWhitelist();
+        };
       });
     }
 
-    function addWhitelist() {
-      const input = document.getElementById('avatar-input');
-      const val = input.value.trim();
-      if (!val) return;
-      if (!whitelist.includes(val)) {
-        whitelist.push(val);
-        renderWhitelist();
-      }
-      input.value = '';
-    }
+    // --- Bind All Events (Tıklamaları Canlandır) ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Mode Selectors
+      document.getElementById('btn-mode-lockdown').onclick = () => setModeUI('lockdown');
+      document.getElementById('btn-mode-tracker').onclick = () => setModeUI('tracker');
+      document.getElementById('btn-mode-disarmed').onclick = () => setModeUI('disarmed');
 
-    function removeWhitelist(idx) {
-      whitelist.splice(idx, 1);
-      renderWhitelist();
-    }
-
-    async function loadSettings() {
-      try {
-        const res = await fetch(`${API_BASE}/settings`);
-        const data = await res.json();
-        if (data.status === "success") {
-          document.getElementById('parcel-name').innerText = data.parcelName;
-          document.getElementById('parcel-sim').innerText = `Region: ${data.region}`;
-
-          const statusBadge = document.getElementById('device-status');
-          if (data.region !== "Offline") {
-            statusBadge.className = "flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20";
-            statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online';
-          }
-
-          const s = data.settings;
-          setMode(s.mode || 'lockdown');
-          document.getElementById('countdown-range').value = s.countdown ?? 10;
-          updateCountdownLabel(s.countdown ?? 10);
-          document.getElementById('action-select').value = s.action || 'eject';
-          document.getElementById('min-height').value = s.minHeight ?? 1.20;
-          document.getElementById('max-height').value = s.maxHeight ?? 2.10;
-          document.getElementById('min-age').value = s.minAge ?? 14;
-          document.getElementById('discord-webhook').value = s.discordWebhook || '';
-          whitelist = s.whitelist || [];
-          renderWhitelist();
-        }
-      } catch (err) {
-        console.error("Failed to load settings:", err);
-      }
-    }
-
-    async function saveAllSettings() {
-      const btn = document.getElementById('btn-sync');
-      const oldHtml = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
-      btn.disabled = true;
-
-      const payload = {
-        mode: activeMode,
-        countdown: Number(document.getElementById('countdown-range').value),
-        action: document.getElementById('action-select').value,
-        minHeight: Number(document.getElementById('min-height').value),
-        maxHeight: Number(document.getElementById('max-height').value),
-        minAge: Number(document.getElementById('min-age').value),
-        discordWebhook: document.getElementById('discord-webhook').value.trim(),
-        whitelist: whitelist
+      // 2. Countdown Range
+      const range = document.getElementById('countdown-range');
+      range.oninput = (e) => {
+        const val = e.target.value;
+        document.getElementById('countdown-val').innerText = val == 0 ? 'Instant (0s)' : val + 's';
       };
 
-      try {
-        const res = await fetch(`${API_BASE}/settings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.status === "success") {
-          showToast("Settings synchronized successfully!");
-        } else {
-          showToast("Sync failed. Check connection.", "error");
+      // 3. Height Checkbox
+      document.getElementById('chk-enable-height').onchange = updateHeightUI;
+
+      // 4. Whitelist Add
+      document.getElementById('btn-add-whitelist').onclick = () => {
+        const input = document.getElementById('avatar-input');
+        const val = input.value.trim();
+        if (val && !whitelist.includes(val)) {
+          whitelist.push(val);
+          renderWhitelist();
+          input.value = '';
         }
-      } catch (err) {
-        showToast("Error connecting to server.", "error");
-      } finally {
-        btn.innerHTML = oldHtml;
-        btn.disabled = false;
-      }
-    }
+      };
 
-    async function testDiscordWebhook() {
-      const webhookUrl = document.getElementById('discord-webhook').value.trim();
-      if (!webhookUrl) {
-        showToast("Please enter a Discord Webhook URL first.", "error");
-        return;
-      }
+      // 5. QR Modal Toggle
+      const qrModal = document.getElementById('qr-modal');
+      document.getElementById('btn-phone-sync').onclick = () => {
+        document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`;
+        qrModal.classList.remove('hidden');
+      };
+      document.getElementById('btn-close-qr').onclick = () => qrModal.classList.add('hidden');
 
-      const btn = document.getElementById('btn-test-discord');
-      const oldHtml = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(`${API_BASE}/test-discord`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ webhookUrl })
-        });
-        const data = await res.json();
-        if (data.status === "success") {
-          showToast("Discord test notification sent!");
-        } else {
-          showToast("Discord returned an error. Check URL.", "error");
+      // 6. Test Discord
+      document.getElementById('btn-test-discord').onclick = async () => {
+        const url = document.getElementById('discord-webhook').value.trim();
+        if (!url) {
+          showToast("Enter a Discord Webhook URL first!", "error");
+          return;
         }
-      } catch (err) {
-        showToast("Failed to reach backend.", "error");
-      } finally {
-        btn.innerHTML = oldHtml;
-        btn.disabled = false;
-      }
-    }
+        showToast("Sending test payload to Discord...");
+        try {
+          const res = await fetch(`${API_BASE}/test-discord`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ webhookUrl: url })
+          });
+          const data = await res.json();
+          if (data.status === 'success') showToast("Discord message delivered!");
+          else showToast("Discord Webhook rejected request", "error");
+        } catch (e) {
+          showToast("Failed to contact backend API", "error");
+        }
+      };
 
-    // Initialize on page load
-    loadSettings();
+      // 7. Sync with Orb
+      document.getElementById('btn-sync').onclick = async () => {
+        const btn = document.getElementById('btn-sync');
+        const oldHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+        btn.disabled = true;
+
+        const payload = {
+          mode: activeMode,
+          countdown: Number(document.getElementById('countdown-range').value),
+          action: document.getElementById('action-select').value,
+          enableGroupPass: document.getElementById('chk-group-pass').checked ? 1 : 0,
+          enableHeight: document.getElementById('chk-enable-height').checked ? 1 : 0,
+          minHeight: Number(document.getElementById('min-height').value),
+          maxHeight: Number(document.getElementById('max-height').value),
+          discordWebhook: document.getElementById('discord-webhook').value.trim(),
+          whitelist: whitelist
+        };
+
+        try {
+          const res = await fetch(`${API_BASE}/settings`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.status === 'success') {
+            showToast("Settings synchronized to in-world Orb!");
+          } else {
+            showToast("Sync failed on server", "error");
+          }
+        } catch (err) {
+          showToast("Network error: Could not reach backend", "error");
+        } finally {
+          btn.innerHTML = oldHtml;
+          btn.disabled = false;
+        }
+      };
+
+      // Fetch Initial Settings from Backend
+      (async () => {
+        try {
+          const res = await fetch(`${API_BASE}/settings`);
+          const data = await res.json();
+          if (data.status === 'success') {
+            document.getElementById('parcel-name').innerText = data.parcelName;
+            document.getElementById('parcel-sim').innerText = `Region: ${data.region}`;
+            const s = data.settings;
+            if (s) {
+              setModeUI(s.mode || 'lockdown');
+              document.getElementById('countdown-range').value = s.countdown ?? 10;
+              document.getElementById('countdown-val').innerText = (s.countdown == 0 ? 'Instant (0s)' : (s.countdown || 10) + 's');
+              document.getElementById('action-select').value = s.action || 'eject';
+              document.getElementById('chk-group-pass').checked = s.enableGroupPass === 1;
+              document.getElementById('chk-enable-height').checked = s.enableHeight === 1;
+              document.getElementById('min-height').value = s.minHeight ?? 1.20;
+              document.getElementById('max-height').value = s.maxHeight ?? 2.10;
+              document.getElementById('discord-webhook').value = s.discordWebhook || '';
+              whitelist = s.whitelist || [];
+              renderWhitelist();
+              updateHeightUI();
+            }
+          }
+        } catch (e) {
+          console.log("Using local default state until backend responds.");
+        }
+      })();
+    });
   </script>
 </body>
 </html>
