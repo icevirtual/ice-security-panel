@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICE Security • Control Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #0b0f17; }
+    .glass-card {
+      background: rgba(18, 24, 38, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col items-center p-4 sm:p-6 selection:bg-cyan-500 selection:text-black">
+
+  <!-- Header -->
+  <header class="w-full max-w-4xl flex items-center justify-between py-4 border-b border-slate-800 mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <i class="fa-solid fa-shield-halved text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-wide text-white">ICE SECURITY</h1>
+        <p class="text-xs text-slate-400">Parcel Guardian & Tracker</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="device-status" class="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online
+      </span>
+      <button onclick="toggleMobileModal()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center gap-2">
+        <i class="fa-solid fa-qrcode"></i> <span class="hidden sm:inline">Phone Sync</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="w-full max-w-4xl space-y-6">
+
+    <!-- Status & Fast Mode Switch -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="glass-card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
+        <div>
+          <span class="text-xs uppercase font-semibold tracking-wider text-cyan-400">Active Parcel</span>
+          <h2 id="parcel-name" class="text-xl font-bold text-white mt-1">Checking connection...</h2>
+          <p id="parcel-sim" class="text-xs text-slate-400 mt-1">Region: Pending Sync</p>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-800">
+          <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white transition flex items-center gap-2">
+            <i class="fa-solid fa-lock"></i> Lockdown
+          </button>
+          <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2">
+            <i class="fa-solid fa-chart-line"></i> Visitor Tracker Only
+          </button>
+          <button class="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30 transition flex items-center gap-2">
+            <i class="fa-solid fa-power-off"></i> Disarm
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
+        <span class="text-xs uppercase font-semibold tracking-wider text-slate-400">Total Visits (24h)</span>
+        <div class="my-2">
+          <span id="visit-count" class="text-3xl font-extrabold text-white tracking-tight">0</span>
+          <span class="text-xs text-slate-400 block mt-1">Unique avatars detected</span>
+        </div>
+        <button class="w-full py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+          View Detailed Logs
+        </button>
+      </div>
+    </div>
+
+    <!-- Rule & Behavior Settings -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Enforcement Settings -->
+      <div class="glass-card rounded-2xl p-6 space-y-5">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-cyan-400"></i> Defense Parameters
+        </h3>
+
+        <!-- Countdown Delay -->
+        <div>
+          <div class="flex justify-between text-xs mb-1.5 font-medium">
+            <span class="text-slate-300">Countdown Warning</span>
+            <span id="countdown-val" class="text-cyan-400 font-bold">10s</span>
+          </div>
+          <input type="range" min="0" max="30" step="5" value="10" id="countdown-range" 
+                 oninput="document.getElementById('countdown-val').innerText = this.value == 0 ? 'Instant (0s)' : this.value + 's'"
+                 class="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg cursor-pointer">
+          <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+            <span>Instant</span>
+            <span>10s</span>
+            <span>20s</span>
+            <span>30s</span>
+          </div>
+        </div>
+
+        <!-- Action Mode -->
+        <div>
+          <label class="text-xs font-medium text-slate-300 block mb-1.5">Action on Expire</label>
+          <select class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-cyan-400 outline-none">
+            <option value="eject">Eject from Parcel</option>
+            <option value="teleport">Teleport Home</option>
+            <option value="ban">Parcel Ban + Eject</option>
+          </select>
+        </div>
+
+        <!-- Height Filter (USP) -->
+        <div class="pt-3 border-t border-slate-800/80">
+          <span class="text-xs font-semibold text-cyan-400 block mb-2">Avatar Height Filter (Roleplay & Anti-Giant)</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] text-slate-400">Min Height (m)</label>
+              <input type="number" step="0.05" value="1.20" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Max Height (m)</label>
+              <input type="number" step="0.05" value="2.10" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white mt-1 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Min Age -->
+        <div>
+          <label class="text-xs font-medium text-slate-300 block mb-1">Min Avatar Age (Days)</label>
+          <input type="number" value="14" placeholder="e.g. 14 days" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none">
+        </div>
+      </div>
+
+      <!-- Discord & Webhook Integration -->
+      <div class="glass-card rounded-2xl p-6 space-y-5">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-brands fa-discord text-indigo-400"></i> Discord Alerts
+        </h3>
+        
+        <div>
+          <label class="text-xs font-medium text-slate-300 block mb-1.5">Discord Webhook URL</label>
+          <input type="text" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-slate-800/80 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-400 outline-none font-mono">
+          <p class="text-[11px] text-slate-500 mt-1">Real-time mobile pushes when an intruder is ejected or a guest enters.</p>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" checked class="accent-indigo-500 rounded">
+            Alert on unauthorized intrusion
+          </label>
+          <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" checked class="accent-indigo-500 rounded">
+            Send daily visitor report
+          </label>
+          <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+            <input type="checkbox" class="accent-indigo-500 rounded">
+            Include avatar profile photo in embed
+          </label>
+        </div>
+
+        <button class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition shadow-lg shadow-indigo-600/20">
+          Test Discord Webhook
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Whitelist & Access Management -->
+    <div class="glass-card rounded-2xl p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-user-check text-emerald-400"></i> Access List (Whitelist)
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Avatars allowed without warning or ejection.</p>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="avatar-input" placeholder="Avatar Legacy Name or UUID" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-56">
+          <button onclick="addWhitelist()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition">
+            Add
+          </button>
+        </div>
+      </div>
+
+      <!-- Current Whitelist Tags -->
+      <div id="whitelist-tags" class="flex flex-wrap gap-2 pt-2">
+        <span class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl">
+          wenious Resident (Owner)
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl">
+          ice.system (Manager)
+          <button class="text-slate-500 hover:text-rose-400 text-xs ml-1">&times;</button>
+        </span>
+      </div>
+    </div>
+
+    <!-- Save Bar -->
+    <div class="sticky bottom-4 w-full">
+      <div class="glass-card rounded-2xl p-3 border border-cyan-500/30 flex items-center justify-between shadow-2xl bg-slate-900/90">
+        <span class="text-xs text-slate-400 pl-2">Changes apply to in-world orb automatically.</span>
+        <button class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs tracking-wide shadow-lg shadow-cyan-500/20 hover:opacity-95 transition">
+          Sync with Orb
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Mobile Sync QR Modal -->
+  <div id="qr-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="glass-card bg-slate-900 border border-slate-700 max-w-sm w-full rounded-2xl p-6 text-center space-y-4">
+      <h3 class="text-base font-bold text-white">Scan for Mobile Studio</h3>
+      <p class="text-xs text-slate-400">Scan this QR code with your phone camera to control your parcel directly from mobile.</p>
+      
+      <div class="flex justify-center my-4">
+        <img id="qr-image" class="w-48 h-48 rounded-xl bg-white p-2 border border-slate-700" 
+             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com" alt="QR Code">
+      </div>
+
+      <button onclick="toggleMobileModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs transition">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function toggleMobileModal() {
+      const modal = document.getElementById('qr-modal');
+      modal.classList.toggle('hidden');
+      // Update dynamic QR to current page URL
+      document.getElementById('qr-image').src = 
+        `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`;
+    }
+
+    function addWhitelist() {
+      const input = document.getElementById('avatar-input');
+      if(!input.value.trim()) return;
+      
+      const container = document.getElementById('whitelist-tags');
+      const tag = document.createElement('span');
+      tag.className = "inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-xl";
+      tag.innerHTML = `${input.value.trim()} <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 text-xs ml-1">&times;</button>`;
+      
+      container.appendChild(tag);
+      input.value = '';
+    }
+  </script>
+</body>
+</html>
