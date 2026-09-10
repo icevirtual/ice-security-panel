@@ -52,7 +52,7 @@
       <div class="glass-card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
         <div>
           <span class="text-xs uppercase font-semibold tracking-wider text-cyan-400">Active Parcel</span>
-          <h2 id="parcel-name" class="text-xl font-bold text-white mt-1">Connecting to Orb...</h2>
+          <h2 id="parcel-name" class="text-xl font-bold text-white mt-1">Connecting...</h2>
           <p id="parcel-sim" class="text-xs text-slate-400 mt-1">Region: Standby</p>
         </div>
         <div class="flex flex-wrap gap-2 mt-5 pt-4 border-t border-slate-800">
@@ -75,8 +75,8 @@
           <span id="visit-count" class="text-3xl font-extrabold text-white tracking-tight">0</span>
           <span class="text-xs text-slate-400 block mt-1">Unique avatars detected</span>
         </div>
-        <button onclick="showToast('Live tracking feed connected')" class="w-full py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
-          Live Status Active
+        <button id="btn-view-visitors" class="w-full py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer">
+          <i class="fa-solid fa-list-ul mr-1"></i> View Detailed Logs
         </button>
       </div>
     </div>
@@ -90,19 +90,25 @@
           <i class="fa-solid fa-sliders text-cyan-400"></i> Defense Parameters
         </h3>
 
-        <!-- Countdown Delay (Off / Instant Included) -->
+        <!-- Countdown Delay + Toggle Checkbox -->
         <div>
-          <div class="flex justify-between text-xs mb-1.5 font-medium">
-            <span class="text-slate-300">Countdown Warning</span>
-            <span id="countdown-val" class="text-cyan-400 font-bold">10s</span>
+          <div class="flex items-center justify-between mb-2">
+            <label class="flex items-center gap-2.5 text-xs text-slate-200 cursor-pointer">
+              <input type="checkbox" id="chk-enable-countdown" checked class="w-4 h-4 accent-cyan-500 rounded cursor-pointer">
+              <span>Enable Countdown Warning</span>
+            </label>
+            <span id="countdown-val" class="text-cyan-400 font-bold text-xs">10s</span>
           </div>
-          <input type="range" min="0" max="30" step="5" value="10" id="countdown-range" 
-                 class="w-full accent-cyan-400 bg-slate-800 h-2 rounded-lg cursor-pointer">
-          <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-            <span class="text-cyan-400 font-medium">Off (0s)</span>
-            <span>10s</span>
-            <span>20s</span>
-            <span>30s</span>
+          
+          <div id="countdown-box" class="transition-all">
+            <input type="range" min="5" max="30" step="5" value="10" id="countdown-range" 
+                   class="w-full accent-cyan-400 bg-slate-800 h-2 rounded-lg cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>5s</span>
+              <span>10s</span>
+              <span>20s</span>
+              <span>30s</span>
+            </div>
           </div>
         </div>
 
@@ -124,7 +130,7 @@
           </label>
         </div>
 
-        <!-- Height Filter (Toggle) -->
+        <!-- Height Filter -->
         <div class="pt-3 border-t border-slate-800">
           <div class="flex items-center justify-between mb-2">
             <label class="flex items-center gap-3 text-xs font-semibold text-cyan-400 cursor-pointer select-none">
@@ -154,18 +160,7 @@
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1.5">Discord Webhook URL</label>
           <input type="text" id="discord-webhook" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-400 outline-none font-mono">
-          <p class="text-[11px] text-slate-500 mt-1">Instant mobile notifications for parcel breaches or visits.</p>
-        </div>
-
-        <div class="space-y-2 pt-2">
-          <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
-            <input type="checkbox" id="chk-alert-intrusion" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
-            <span>Alert on unauthorized intrusion</span>
-          </label>
-          <label class="flex items-center gap-3 text-xs text-slate-300 cursor-pointer select-none">
-            <input type="checkbox" id="chk-daily-report" checked class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
-            <span>Send daily visitor report</span>
-          </label>
+          <p class="text-[11px] text-slate-500 mt-1">Automatic push when intruders are removed or visitors enter.</p>
         </div>
 
         <button id="btn-test-discord" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer">
@@ -185,7 +180,7 @@
           <p class="text-xs text-slate-400 mt-0.5">Avatars allowed without warning or ejection.</p>
         </div>
         <div class="flex gap-2">
-          <input type="text" id="avatar-input" placeholder="Avatar Name or UUID" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-56">
+          <input type="text" id="avatar-input" placeholder="Avatar Legacy Name (e.g. Resident Name)" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none w-56">
           <button id="btn-add-whitelist" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition cursor-pointer">
             Add
           </button>
@@ -199,7 +194,7 @@
     <!-- Save Bar -->
     <div class="sticky bottom-4 w-full">
       <div class="glass-card rounded-2xl p-3 border border-cyan-500/30 flex items-center justify-between shadow-2xl bg-slate-900/90">
-        <span class="text-xs text-slate-400 pl-2">Changes apply to in-world orb automatically.</span>
+        <span class="text-xs text-slate-400 pl-2">Syncs with in-world orb automatically on change.</span>
         <button id="btn-sync" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-xs tracking-wide shadow-lg shadow-cyan-500/20 hover:opacity-95 transition flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-rotate"></i> Sync with Orb
         </button>
@@ -208,17 +203,32 @@
 
   </main>
 
+  <!-- Visitor Logs Modal -->
+  <div id="visitor-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="glass-card bg-slate-900 border border-slate-700 max-w-md w-full rounded-2xl p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> Recent Visitors Log
+        </h3>
+        <button id="btn-close-visitor" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+      <div id="visitor-list-container" class="max-h-64 overflow-y-auto space-y-2 pr-1 text-xs">
+        <p class="text-slate-500">No visitors logged yet.</p>
+      </div>
+      <button id="btn-close-visitor-footer" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs transition cursor-pointer">
+        Close
+      </button>
+    </div>
+  </div>
+
   <!-- Mobile Sync QR Modal -->
   <div id="qr-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="glass-card bg-slate-900 border border-slate-700 max-w-sm w-full rounded-2xl p-6 text-center space-y-4">
       <h3 class="text-base font-bold text-white">Scan for Mobile Studio</h3>
       <p class="text-xs text-slate-400">Scan this QR code with your phone camera to control your parcel directly from mobile.</p>
-      
       <div class="flex justify-center my-4">
-        <img id="qr-image" class="w-48 h-48 rounded-xl bg-white p-2 border border-slate-700" 
-             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com" alt="QR Code">
+        <img id="qr-image" class="w-48 h-48 rounded-xl bg-white p-2 border border-slate-700" src="" alt="QR Code">
       </div>
-
       <button id="btn-close-qr" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs transition cursor-pointer">
         Close
       </button>
@@ -229,6 +239,7 @@
     const API_BASE = "https://ice-security-backend.onrender.com/api";
     let activeMode = "lockdown";
     let whitelist = [];
+    let currentLogs = [];
 
     function showToast(text, type = "success") {
       const toast = document.getElementById('toast');
@@ -252,7 +263,7 @@
       }, 3500);
     }
 
-    function setModeUI(mode) {
+    function setModeUI(mode, shouldSync = true) {
       activeMode = mode;
       const modes = ['lockdown', 'tracker', 'disarmed'];
       modes.forEach(m => {
@@ -268,6 +279,24 @@
           btn.className = "mode-btn px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-2 cursor-pointer";
         }
       });
+
+      localStorage.setItem('ice_sec_mode', mode);
+      if (shouldSync) saveSettingsDirectly();
+    }
+
+    function updateCountdownUI() {
+      const isEnabled = document.getElementById('chk-enable-countdown').checked;
+      const box = document.getElementById('countdown-box');
+      const valLabel = document.getElementById('countdown-val');
+      const range = document.getElementById('countdown-range');
+
+      if (isEnabled) {
+        box.classList.remove('opacity-40', 'pointer-events-none');
+        valLabel.innerText = range.value + 's';
+      } else {
+        box.classList.add('opacity-40', 'pointer-events-none');
+        valLabel.innerText = 'Off (Instant)';
+      }
     }
 
     function updateHeightUI() {
@@ -278,10 +307,6 @@
       } else {
         box.classList.add('opacity-40', 'pointer-events-none');
       }
-    }
-
-    function updateCountdownLabel(val) {
-      document.getElementById('countdown-val').innerText = (val == 0) ? 'Off (Instant)' : val + 's';
     }
 
     function renderWhitelist() {
@@ -298,36 +323,131 @@
         btn.onclick = (e) => {
           const idx = parseInt(e.currentTarget.getAttribute('data-index'));
           whitelist.splice(idx, 1);
+          localStorage.setItem('ice_sec_whitelist', JSON.stringify(whitelist));
           renderWhitelist();
+          saveSettingsDirectly();
         };
       });
     }
 
+    function renderVisitorModal() {
+      const box = document.getElementById('visitor-list-container');
+      box.innerHTML = '';
+      if (!currentLogs || currentLogs.length === 0) {
+        box.innerHTML = '<p class="text-slate-500">No visitors logged yet.</p>';
+        return;
+      }
+      currentLogs.forEach(v => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between bg-slate-800/60 p-2.5 rounded-xl border border-slate-800";
+        row.innerHTML = `<span class="font-medium text-slate-200">${v.name}</span><span class="text-slate-500 text-[11px]">${v.time}</span>`;
+        box.appendChild(row);
+      });
+    }
+
+    async function saveSettingsDirectly() {
+      const enableCd = document.getElementById('chk-enable-countdown').checked ? 1 : 0;
+      const payload = {
+        mode: activeMode,
+        enableCountdown: enableCd,
+        countdown: Number(document.getElementById('countdown-range').value),
+        action: document.getElementById('action-select').value,
+        enableGroupPass: document.getElementById('chk-group-pass').checked ? 1 : 0,
+        enableHeight: document.getElementById('chk-enable-height').checked ? 1 : 0,
+        minHeight: Number(document.getElementById('min-height').value),
+        maxHeight: Number(document.getElementById('max-height').value),
+        discordWebhook: document.getElementById('discord-webhook').value.trim(),
+        whitelist: whitelist
+      };
+
+      localStorage.setItem('ice_sec_settings', JSON.stringify(payload));
+      localStorage.setItem('ice_sec_whitelist', JSON.stringify(whitelist));
+
+      try {
+        const res = await fetch(`${API_BASE}/settings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          showToast(`Mode: ${activeMode.toUpperCase()} synchronized!`);
+        }
+      } catch (err) {
+        console.warn("Backend sleeping, saved locally.");
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Mode Selectors
-      document.getElementById('btn-mode-lockdown').onclick = () => setModeUI('lockdown');
-      document.getElementById('btn-mode-tracker').onclick = () => setModeUI('tracker');
-      document.getElementById('btn-mode-disarmed').onclick = () => setModeUI('disarmed');
+      // 1. LocalStorage Yükle
+      const savedMode = localStorage.getItem('ice_sec_mode') || 'lockdown';
+      const savedSettings = JSON.parse(localStorage.getItem('ice_sec_settings') || '{}');
+      whitelist = JSON.parse(localStorage.getItem('ice_sec_whitelist') || '[]');
 
-      // 2. Countdown Range
+      setModeUI(savedMode, false);
+      renderWhitelist();
+
+      if (savedSettings.enableCountdown !== undefined) {
+        document.getElementById('chk-enable-countdown').checked = (savedSettings.enableCountdown === 1);
+      }
+      if (savedSettings.countdown !== undefined) {
+        document.getElementById('countdown-range').value = savedSettings.countdown;
+      }
+      updateCountdownUI();
+
+      if (savedSettings.action) document.getElementById('action-select').value = savedSettings.action;
+      if (savedSettings.enableGroupPass !== undefined) document.getElementById('chk-group-pass').checked = (savedSettings.enableGroupPass === 1);
+      if (savedSettings.enableHeight !== undefined) document.getElementById('chk-enable-height').checked = (savedSettings.enableHeight === 1);
+      if (savedSettings.minHeight) document.getElementById('min-height').value = savedSettings.minHeight;
+      if (savedSettings.maxHeight) document.getElementById('max-height').value = savedSettings.maxHeight;
+      if (savedSettings.discordWebhook) document.getElementById('discord-webhook').value = savedSettings.discordWebhook;
+      updateHeightUI();
+
+      // 2. Mod Butonları
+      document.getElementById('btn-mode-lockdown').onclick = () => setModeUI('lockdown', true);
+      document.getElementById('btn-mode-tracker').onclick = () => setModeUI('tracker', true);
+      document.getElementById('btn-mode-disarmed').onclick = () => setModeUI('disarmed', true);
+
+      // 3. Countdown Eventleri
+      document.getElementById('chk-enable-countdown').onchange = () => {
+        updateCountdownUI();
+        saveSettingsDirectly();
+      };
       const range = document.getElementById('countdown-range');
-      range.oninput = (e) => updateCountdownLabel(e.target.value);
+      range.oninput = () => updateCountdownUI();
+      range.onchange = () => saveSettingsDirectly();
 
-      // 3. Height Checkbox
-      document.getElementById('chk-enable-height').onchange = updateHeightUI;
+      // 4. Diğer Ayarlar
+      document.getElementById('chk-enable-height').onchange = () => {
+        updateHeightUI();
+        saveSettingsDirectly();
+      };
+      document.getElementById('chk-group-pass').onchange = () => saveSettingsDirectly();
+      document.getElementById('action-select').onchange = () => saveSettingsDirectly();
 
-      // 4. Whitelist Add
+      // 5. Whitelist
       document.getElementById('btn-add-whitelist').onclick = () => {
         const input = document.getElementById('avatar-input');
         const val = input.value.trim();
         if (val && !whitelist.includes(val)) {
           whitelist.push(val);
+          localStorage.setItem('ice_sec_whitelist', JSON.stringify(whitelist));
           renderWhitelist();
           input.value = '';
+          saveSettingsDirectly();
         }
       };
 
-      // 5. QR Modal Toggle
+      // 6. Visitor Modal
+      const visitorModal = document.getElementById('visitor-modal');
+      document.getElementById('btn-view-visitors').onclick = () => {
+        renderVisitorModal();
+        visitorModal.classList.remove('hidden');
+      };
+      document.getElementById('btn-close-visitor').onclick = () => visitorModal.classList.add('hidden');
+      document.getElementById('btn-close-visitor-footer').onclick = () => visitorModal.classList.add('hidden');
+
+      // 7. QR Sync
       const qrModal = document.getElementById('qr-modal');
       document.getElementById('btn-phone-sync').onclick = () => {
         document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`;
@@ -335,14 +455,14 @@
       };
       document.getElementById('btn-close-qr').onclick = () => qrModal.classList.add('hidden');
 
-      // 6. Test Discord
+      // 8. Discord Test
       document.getElementById('btn-test-discord').onclick = async () => {
         const url = document.getElementById('discord-webhook').value.trim();
         if (!url) {
-          showToast("Enter a Discord Webhook URL first!", "error");
+          showToast("Enter Discord Webhook URL first!", "error");
           return;
         }
-        showToast("Sending test payload to Discord...");
+        showToast("Sending Discord test notification...");
         try {
           const res = await fetch(`${API_BASE}/test-discord`, {
             method: 'POST',
@@ -350,54 +470,26 @@
             body: JSON.stringify({ webhookUrl: url })
           });
           const data = await res.json();
-          if (data.status === 'success') showToast("Discord message delivered!");
+          if (data.status === 'success') showToast("Discord ping verified!");
           else showToast("Discord Webhook rejected request", "error");
         } catch (e) {
-          showToast("Failed to contact backend API", "error");
+          showToast("Backend connection error", "error");
         }
       };
 
-      // 7. Sync with Orb
+      // 9. Manuel Sync
       document.getElementById('btn-sync').onclick = async () => {
         const btn = document.getElementById('btn-sync');
         const oldHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
         btn.disabled = true;
-
-        const payload = {
-          mode: activeMode,
-          countdown: Number(document.getElementById('countdown-range').value),
-          action: document.getElementById('action-select').value,
-          enableGroupPass: document.getElementById('chk-group-pass').checked ? 1 : 0,
-          enableHeight: document.getElementById('chk-enable-height').checked ? 1 : 0,
-          minHeight: Number(document.getElementById('min-height').value),
-          maxHeight: Number(document.getElementById('max-height').value),
-          discordWebhook: document.getElementById('discord-webhook').value.trim(),
-          whitelist: whitelist
-        };
-
-        try {
-          const res = await fetch(`${API_BASE}/settings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          if (data.status === 'success') {
-            showToast("Settings synchronized to in-world Orb!");
-          } else {
-            showToast("Sync failed on server", "error");
-          }
-        } catch (err) {
-          showToast("Network error: Could not reach backend", "error");
-        } finally {
-          btn.innerHTML = oldHtml;
-          btn.disabled = false;
-        }
+        await saveSettingsDirectly();
+        btn.innerHTML = oldHtml;
+        btn.disabled = false;
       };
 
-      // Backend veri senkronizasyonu
-      (async () => {
+      // 10. Canlı Veri Çekme (Poll/Load)
+      const fetchLiveData = async () => {
         try {
           const res = await fetch(`${API_BASE}/settings`);
           const data = await res.json();
@@ -407,27 +499,17 @@
             if (data.totalVisits !== undefined) {
               document.getElementById('visit-count').innerText = data.totalVisits;
             }
-
-            const s = data.settings;
-            if (s) {
-              setModeUI(s.mode || 'lockdown');
-              document.getElementById('countdown-range').value = s.countdown ?? 10;
-              updateCountdownLabel(s.countdown ?? 10);
-              document.getElementById('action-select').value = s.action || 'eject';
-              document.getElementById('chk-group-pass').checked = s.enableGroupPass === 1;
-              document.getElementById('chk-enable-height').checked = s.enableHeight === 1;
-              document.getElementById('min-height').value = s.minHeight ?? 1.20;
-              document.getElementById('max-height').value = s.maxHeight ?? 2.10;
-              document.getElementById('discord-webhook').value = s.discordWebhook || '';
-              whitelist = s.whitelist || [];
-              renderWhitelist();
-              updateHeightUI();
+            if (data.visitorLogs) {
+              currentLogs = data.visitorLogs;
             }
           }
         } catch (e) {
-          console.log("Offline mode fallback");
+          console.log("Using cached offline state");
         }
-      })();
+      };
+
+      fetchLiveData();
+      setInterval(fetchLiveData, 5000); // 5 saniyede bir ziyaretçileri otomatik tazele
     });
   </script>
 </body>
