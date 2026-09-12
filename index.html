@@ -28,8 +28,8 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <span id="device-status" class="flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online
+      <span id="device-status" class="flex items-center gap-1.5 text-xs bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/20">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Standby
       </span>
       <button id="btn-phone-sync" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-sm flex items-center gap-2 cursor-pointer">
         <i class="fa-solid fa-qrcode"></i> <span class="hidden sm:inline">Phone Sync</span>
@@ -43,6 +43,18 @@
   </div>
 
   <main class="w-full max-w-4xl space-y-6">
+
+    <!-- Owner UUID Badge Bar -->
+    <div class="glass-card rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-slate-800">
+      <div class="flex items-center gap-2 text-xs">
+        <i class="fa-solid fa-fingerprint text-cyan-400"></i>
+        <span class="text-slate-400">Linked Owner:</span>
+        <span id="owner-uuid-display" class="font-mono text-cyan-300 font-semibold">Detecting...</span>
+      </div>
+      <button id="btn-change-owner" class="text-[11px] text-slate-400 hover:text-white underline cursor-pointer self-start sm:self-auto">
+        Switch Owner UUID
+      </button>
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="glass-card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
@@ -202,6 +214,20 @@
 
   </main>
 
+  <!-- Owner ID Setup Modal -->
+  <div id="owner-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="glass-card bg-slate-900 border border-cyan-500/30 max-w-sm w-full rounded-2xl p-6 space-y-4">
+      <div class="flex items-center gap-2 text-cyan-400 font-bold text-sm uppercase">
+        <i class="fa-solid fa-key"></i> Link Second Life Owner
+      </div>
+      <p class="text-xs text-slate-300">Enter your Second Life Avatar UUID to link your in-world security orb to this dashboard.</p>
+      <input type="text" id="manual-owner-input" placeholder="e8f0ec1a-62d8-4986-9e3f-8aaa3acbb3d9" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono outline-none focus:border-cyan-400">
+      <button id="btn-save-owner" class="w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-95 text-white rounded-xl text-xs font-semibold transition cursor-pointer">
+        Save & Connect
+      </button>
+    </div>
+  </div>
+
   <div id="visitor-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
     <div class="glass-card bg-slate-900 border border-slate-700 max-w-md w-full rounded-2xl p-6 space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -234,16 +260,39 @@
 
   <script>
     const API_BASE = "https://ice-security-backend.onrender.com/api";
-    const urlParams = new URLSearchParams(window.location.search);
-    const ownerId = urlParams.get('id') || localStorage.getItem('ice_sec_owner_id') || "";
-
-    if (urlParams.get('id')) {
-      localStorage.setItem('ice_sec_owner_id', urlParams.get('id'));
+    
+    // Robust Owner ID Resolution
+    function resolveOwnerId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let id = urlParams.get('id');
+      
+      if (!id && window.location.hash) {
+        id = window.location.hash.replace('#', '');
+      }
+      
+      if (id) {
+        localStorage.setItem('ice_sec_owner_id', id.trim());
+        return id.trim();
+      }
+      
+      return (localStorage.getItem('ice_sec_owner_id') || "").trim();
     }
 
+    let ownerId = resolveOwnerId();
     let activeMode = "lockdown";
     let whitelist = [];
     let currentLogs = [];
+
+    function updateOwnerBadge() {
+      const badge = document.getElementById('owner-uuid-display');
+      if (ownerId) {
+        badge.innerText = `${ownerId.substring(0, 8)}...${ownerId.substring(ownerId.length - 4)}`;
+        badge.title = ownerId;
+      } else {
+        badge.innerText = "No Device Linked";
+        document.getElementById('owner-modal').classList.remove('hidden');
+      }
+    }
 
     function showToast(text, type = "success") {
       const toast = document.getElementById('toast');
@@ -284,7 +333,7 @@
         }
       });
 
-      localStorage.setItem(`ice_sec_mode_${ownerId}`, mode);
+      if (ownerId) localStorage.setItem(`ice_sec_mode_${ownerId}`, mode);
       if (shouldSync) saveSettingsDirectly();
     }
 
@@ -327,14 +376,13 @@
         btn.onclick = (e) => {
           const idx = parseInt(e.currentTarget.getAttribute('data-index'));
           whitelist.splice(idx, 1);
-          localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
+          if (ownerId) localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
           renderWhitelist();
           saveSettingsDirectly();
         };
       });
     }
 
-    // Live Presence with Kick Action
     function renderLiveRadar(avatars) {
       const container = document.getElementById('live-avatars-container');
       const counter = document.getElementById('live-count');
@@ -398,7 +446,8 @@
 
     async function saveSettingsDirectly() {
       if (!ownerId) {
-        showToast("No Orb linked! Touch your Orb in-world.", "error");
+        showToast("No Orb linked! Enter your Owner UUID.", "error");
+        document.getElementById('owner-modal').classList.remove('hidden');
         return;
       }
 
@@ -417,8 +466,10 @@
         whitelist: whitelist
       };
 
-      localStorage.setItem(`ice_sec_settings_${ownerId}`, JSON.stringify(payload));
-      localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
+      if (ownerId) {
+        localStorage.setItem(`ice_sec_settings_${ownerId}`, JSON.stringify(payload));
+        localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
+      }
 
       try {
         const res = await fetch(`${API_BASE}/settings?id=${ownerId}`, {
@@ -428,17 +479,22 @@
         });
         const data = await res.json();
         if (data.status === 'success') {
-          showToast(`Mode: ${activeMode.toUpperCase()} synchronized!`);
+          showToast(`Settings synchronized with in-world orb!`);
+        } else if (data.status === 'warning') {
+          showToast(data.error, "error");
         }
       } catch (err) {
         console.warn("Backend sleeping, saved locally.");
+        showToast("Saved locally (Backend sleeping)", "warning");
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const savedMode = localStorage.getItem(`ice_sec_mode_${ownerId}`) || 'lockdown';
-      const savedSettings = JSON.parse(localStorage.getItem(`ice_sec_settings_${ownerId}`) || '{}');
-      whitelist = JSON.parse(localStorage.getItem(`ice_sec_whitelist_${ownerId}`) || '[]');
+      updateOwnerBadge();
+
+      const savedMode = (ownerId && localStorage.getItem(`ice_sec_mode_${ownerId}`)) || 'lockdown';
+      const savedSettings = JSON.parse((ownerId && localStorage.getItem(`ice_sec_settings_${ownerId}`)) || '{}');
+      whitelist = JSON.parse((ownerId && localStorage.getItem(`ice_sec_whitelist_${ownerId}`)) || '[]');
 
       setModeUI(savedMode, false);
       renderWhitelist();
@@ -459,10 +515,12 @@
       if (savedSettings.discordWebhook) document.getElementById('discord-webhook').value = savedSettings.discordWebhook;
       updateHeightUI();
 
+      // Mode toggles
       document.getElementById('btn-mode-lockdown').onclick = () => setModeUI('lockdown', true);
       document.getElementById('btn-mode-tracker').onclick = () => setModeUI('tracker', true);
       document.getElementById('btn-mode-disarmed').onclick = () => setModeUI('disarmed', true);
 
+      // Defense params change listeners
       document.getElementById('chk-enable-countdown').onchange = () => {
         updateCountdownUI();
         saveSettingsDirectly();
@@ -478,18 +536,20 @@
       document.getElementById('chk-group-pass').onchange = () => saveSettingsDirectly();
       document.getElementById('action-select').onchange = () => saveSettingsDirectly();
 
+      // Whitelist add
       document.getElementById('btn-add-whitelist').onclick = () => {
         const input = document.getElementById('avatar-input');
         const val = input.value.trim();
         if (val && !whitelist.includes(val)) {
           whitelist.push(val);
-          localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
+          if (ownerId) localStorage.setItem(`ice_sec_whitelist_${ownerId}`, JSON.stringify(whitelist));
           renderWhitelist();
           input.value = '';
           saveSettingsDirectly();
         }
       };
 
+      // Modals
       const visitorModal = document.getElementById('visitor-modal');
       document.getElementById('btn-view-visitors').onclick = () => {
         renderVisitorModal();
@@ -500,11 +560,28 @@
 
       const qrModal = document.getElementById('qr-modal');
       document.getElementById('btn-phone-sync').onclick = () => {
-        document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.href)}`;
+        const currentUrl = `${window.location.origin}${window.location.pathname}?id=${ownerId}`;
+        document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
         qrModal.classList.remove('hidden');
       };
       document.getElementById('btn-close-qr').onclick = () => qrModal.classList.add('hidden');
 
+      // Change Owner Modal Handlers
+      document.getElementById('btn-change-owner').onclick = () => {
+        document.getElementById('manual-owner-input').value = ownerId;
+        document.getElementById('owner-modal').classList.remove('hidden');
+      };
+
+      document.getElementById('btn-save-owner').onclick = () => {
+        const newId = document.getElementById('manual-owner-input').value.trim();
+        if (newId) {
+          ownerId = newId;
+          localStorage.setItem('ice_sec_owner_id', newId);
+          window.location.search = `?id=${newId}`;
+        }
+      };
+
+      // Discord ping
       document.getElementById('btn-test-discord').onclick = async () => {
         const url = document.getElementById('discord-webhook').value.trim();
         if (!url) {
@@ -526,6 +603,7 @@
         }
       };
 
+      // Explicit Sync Button
       document.getElementById('btn-sync').onclick = async () => {
         const btn = document.getElementById('btn-sync');
         const oldHtml = btn.innerHTML;
@@ -536,6 +614,7 @@
         btn.disabled = false;
       };
 
+      // Polling live telemetry
       const fetchLiveData = async () => {
         if (!ownerId) return;
         try {
@@ -544,6 +623,16 @@
           if (data.status === 'success') {
             document.getElementById('parcel-name').innerText = data.parcelName;
             document.getElementById('parcel-sim').innerText = `Region: ${data.region}`;
+            
+            const statusBadge = document.getElementById('device-status');
+            if (data.orbConnected) {
+              statusBadge.className = "flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20";
+              statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online';
+            } else {
+              statusBadge.className = "flex items-center gap-1.5 text-xs bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/20";
+              statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Standby';
+            }
+
             if (data.totalVisits !== undefined) {
               document.getElementById('visit-count').innerText = data.totalVisits;
             }
