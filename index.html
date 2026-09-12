@@ -88,12 +88,12 @@
       </div>
     </div>
 
-    <!-- Live Parcel Radar with Remote Kick -->
+    <!-- Live Parcel Radar with Remote Kick (Auto Live Updating) -->
     <div class="glass-card rounded-2xl p-5">
       <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Parcel Radar (Present Now)</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Parcel Radar (Real-Time)</h3>
         </div>
         <span id="live-count" class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full font-mono">0 Avatars</span>
       </div>
@@ -376,20 +376,23 @@
       });
     }
 
+    // Dynamic Live Radar Render
     function renderLiveRadar(avatars) {
       const container = document.getElementById('live-avatars-container');
       const counter = document.getElementById('live-count');
-      counter.innerText = `${avatars.length} Avatars`;
+      
+      const currentList = Array.isArray(avatars) ? avatars : [];
+      counter.innerText = `${currentList.length} Avatars`;
 
-      if (!avatars || avatars.length === 0) {
+      if (currentList.length === 0) {
         container.innerHTML = '<span class="text-slate-500 italic">Parcel is currently empty.</span>';
         return;
       }
 
       container.innerHTML = '';
-      avatars.forEach(name => {
+      currentList.forEach(name => {
         const badge = document.createElement('div');
-        badge.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium text-xs";
+        badge.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium text-xs animate-fadeIn";
         badge.innerHTML = `
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 
           <span>${name}</span>
@@ -414,6 +417,7 @@
         const data = await res.json();
         if (data.status === 'success') {
           showToast(`${avatarName} kicked successfully!`);
+          fetchLiveData(); // Force immediate radar refresh
         } else {
           showToast(`Failed: Avatar not on parcel or orb offline`, 'error');
         }
@@ -481,6 +485,39 @@
         showToast("Saved locally (Backend sleeping)", "warning");
       }
     }
+
+    // Auto-polling live engine
+    const fetchLiveData = async () => {
+      if (!ownerId) return;
+      try {
+        const res = await fetch(`${API_BASE}/settings?id=${ownerId}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+          document.getElementById('parcel-name').innerText = data.parcelName;
+          document.getElementById('parcel-sim').innerText = `Region: ${data.region}`;
+          
+          const statusBadge = document.getElementById('device-status');
+          if (data.orbConnected) {
+            statusBadge.className = "flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20";
+            statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online';
+          } else {
+            statusBadge.className = "flex items-center gap-1.5 text-xs bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/20";
+            statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Standby';
+          }
+
+          if (data.totalVisits !== undefined) {
+            document.getElementById('visit-count').innerText = data.totalVisits;
+          }
+          if (data.visitorLogs) {
+            currentLogs = data.visitorLogs;
+          }
+          // Real-time live presence update without page refresh
+          renderLiveRadar(data.onlineAvatars || []);
+        }
+      } catch (e) {
+        console.log("Using cached offline state");
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       updateOwnerBadge();
@@ -600,41 +637,9 @@
         btn.disabled = false;
       };
 
-      const fetchLiveData = async () => {
-        if (!ownerId) return;
-        try {
-          const res = await fetch(`${API_BASE}/settings?id=${ownerId}`);
-          const data = await res.json();
-          if (data.status === 'success') {
-            document.getElementById('parcel-name').innerText = data.parcelName;
-            document.getElementById('parcel-sim').innerText = `Region: ${data.region}`;
-            
-            const statusBadge = document.getElementById('device-status');
-            if (data.orbConnected) {
-              statusBadge.className = "flex items-center gap-1.5 text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20";
-              statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online';
-            } else {
-              statusBadge.className = "flex items-center gap-1.5 text-xs bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/20";
-              statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Standby';
-            }
-
-            if (data.totalVisits !== undefined) {
-              document.getElementById('visit-count').innerText = data.totalVisits;
-            }
-            if (data.visitorLogs) {
-              currentLogs = data.visitorLogs;
-            }
-            if (data.onlineAvatars !== undefined) {
-              renderLiveRadar(data.onlineAvatars);
-            }
-          }
-        } catch (e) {
-          console.log("Using cached offline state");
-        }
-      };
-
+      // Initial Fetch & Active Polling Loop (Every 2 seconds)
       fetchLiveData();
-      setInterval(fetchLiveData, 3000);
+      setInterval(fetchLiveData, 2000);
     });
   </script>
 </body>
