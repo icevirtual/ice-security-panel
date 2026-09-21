@@ -47,7 +47,6 @@
       max-width: 900px;
     }
 
-    /* Header */
     header {
       display: flex;
       justify-content: space-between;
@@ -110,7 +109,6 @@
       box-shadow: 0 0 8px var(--success);
     }
 
-    /* Grid Layout */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -146,7 +144,6 @@
       margin-bottom: 14px;
     }
 
-    /* Inputs & Buttons */
     .input-field {
       width: 100%;
       background: rgba(3, 7, 18, 0.7);
@@ -183,10 +180,9 @@
       transform: translateY(-1px);
     }
 
-    /* Avatar Presence List */
     .radar-list {
       list-style: none;
-      max-height: 180px;
+      max-height: 220px;
       overflow-y: auto;
     }
 
@@ -205,11 +201,12 @@
       background: rgba(255, 0, 85, 0.15);
       border: 1px solid rgba(255, 0, 85, 0.3);
       color: var(--accent);
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 4px;
       font-size: 0.75rem;
       cursor: pointer;
       font-weight: 700;
+      transition: 0.2s;
     }
 
     .btn-kick:hover {
@@ -296,7 +293,7 @@
 </head>
 <body>
 
-  <!-- Inzu y'Umutekano / PIN Security Modal -->
+  <!-- Cyber Security PIN Modal -->
   <div id="pinModalOverlay" class="cyber-modal-overlay" style="display: none;">
     <div class="cyber-pin-card">
       <div class="cyber-shield-icon">
@@ -306,16 +303,16 @@
         </svg>
       </div>
       <h3>SECURITY ACCESS</h3>
-      <p>Injiza kode ya PIN kugira ngo ufungure porogaramu</p>
+      <p>Paneli açmak için uzaktan erişim PIN kodunuzu girin</p>
 
       <input type="password" id="modalPinInput" maxlength="8" placeholder="••••" autocomplete="off" />
       <div id="pinErrorMsg" class="pin-error" style="display: none;"></div>
       
-      <button class="btn" onclick="submitModalPin()">KUNZURA SISITEMU</button>
+      <button class="btn" onclick="submitModalPin()">KİLİDİ AÇ</button>
     </div>
   </div>
 
-  <!-- Umubiri w'Urubuga / Main Studio Container -->
+  <!-- Main Studio Dashboard -->
   <div class="container" id="mainStudio" style="display: none;">
     <header>
       <div class="brand">
@@ -332,24 +329,24 @@
     </header>
 
     <div class="grid">
-      <!-- Ikarita y'Umutekano wa PIN -->
+      <!-- Remote PIN Card -->
       <div class="card">
         <div class="card-header">
-          <h3>REMOTE ACCESS PIN</h3>
+          <h3>UZAKTAN ERİŞİM PIN</h3>
         </div>
-        <p class="desc">Shyiraho PIN (imibare 4-8) yo gukoresha ku yindi mashini cyangwa telefoni.</p>
-        <input type="password" id="newPinInput" class="input-field" placeholder="Shyiramo PIN nshya" maxlength="8" />
-        <button class="btn" onclick="saveNewPinFromUI()">BIKA PIN</button>
+        <p class="desc">Telefon veya başka tarayıcılardan güvenli giriş için 4-8 haneli PIN belirleyin.</p>
+        <input type="password" id="newPinInput" class="input-field" placeholder="Yeni PIN (4-8 hane)" maxlength="8" />
+        <button class="btn" onclick="saveNewPinFromUI()">PIN'İ KAYDET</button>
       </div>
 
-      <!-- Ikarita ya Radar / Abalimo -->
+      <!-- Live Radar Card -->
       <div class="card">
         <div class="card-header">
-          <h3>LIVE RADAR</h3>
+          <h3>CANLI RADAR</h3>
         </div>
-        <p class="desc">Abari mu kibanza muri aka kanya:</p>
+        <p class="desc">Şu anda parselde tespit edilen avatarlar:</p>
         <ul id="avatarList" class="radar-list">
-          <li class="radar-item">Nta muntu uraboneka...</li>
+          <li class="radar-item">Kimse tespit edilmedi...</li>
         </ul>
       </div>
     </div>
@@ -386,7 +383,7 @@
 
     async function fetchStudioData() {
       if (!ownerId) {
-        alert("Shyiramo UUID muri URL (?id=UUID)");
+        alert("Lütfen linke UUID ekleyin: ?id=UUID");
         return;
       }
 
@@ -418,7 +415,7 @@
       listEl.innerHTML = "";
 
       if (!data.onlineAvatars || data.onlineAvatars.length === 0) {
-        listEl.innerHTML = "<li class='radar-item'>Nta wundi muntu urimo.</li>";
+        listEl.innerHTML = "<li class='radar-item'>Parselde kimse yok.</li>";
         return;
       }
 
@@ -436,7 +433,7 @@
     async function submitModalPin() {
       const pinVal = document.getElementById('modalPinInput').value.trim();
       if (pinVal.length < 4) {
-        showPinModal("PIN igomba kuba byibuze imibare 4.");
+        showPinModal("PIN en az 4 haneli olmalıdır.");
         return;
       }
 
@@ -454,17 +451,17 @@
           hidePinModal();
           fetchStudioData();
         } else {
-          showPinModal("PIN ntabwo ariyo! Wongeye kugerageza.");
+          showPinModal("Hatalı PIN! Lütfen tekrar deneyin.");
         }
       } catch (e) {
-        showPinModal("Ikosa ry'itumanaho ryabaye.");
+        showPinModal("Bağlantı hatası oluştu.");
       }
     }
 
     async function saveNewPinFromUI() {
       const newPin = document.getElementById('newPinInput').value.trim();
       if (newPin.length < 4 || newPin.length > 8) {
-        alert("PIN igomba kuba iri hagati y'imibare 4 na 8.");
+        alert("PIN 4 ile 8 hane arasında olmalıdır.");
         return;
       }
 
@@ -480,26 +477,26 @@
           storedPin = newPin;
           localStorage.setItem('ice_pin_' + ownerId, newPin);
           document.getElementById('newPinInput').value = "";
-          alert("PIN yawe nshya yabitswe neza!");
+          alert("Uzaktan erişim PIN kodunuz başarıyla kaydedildi!");
         } else {
-          alert(data.error || "Ntibyashobotse kubika PIN.");
+          alert(data.error || "PIN kaydedilemedi.");
         }
       } catch (e) {
-        alert("Ikosa rya seriveri ryabaye.");
+        alert("Sunucuyla bağlantı kurulamadı.");
       }
     }
 
     async function kickAvatar(name) {
-      if (!confirm(`${name} kumwirukana mu kibanza urabyizeye?`)) return;
+      if (!confirm(`${name} parselden atılsın mı?`)) return;
       try {
         await fetch(`${BACKEND_URL}/api/manual-action`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ownerId: ownerId, targetName: name })
         });
-        alert(`Itegeko ryo kwirukana ${name} ryoherejwe!`);
+        alert(`${name} için eject komutu gönderildi!`);
       } catch (e) {
-        alert("Ntibyashobotse kohereza itegeko.");
+        alert("Komut gönderilemedi.");
       }
     }
 
