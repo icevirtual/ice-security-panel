@@ -44,7 +44,7 @@
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 960px;
     }
 
     header {
@@ -63,8 +63,8 @@
     }
 
     .brand-logo {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       background: linear-gradient(135deg, var(--primary), #0066cc);
       border-radius: 8px;
       display: flex;
@@ -72,6 +72,7 @@
       justify-content: center;
       font-weight: 700;
       color: #000;
+      font-size: 1.1rem;
       box-shadow: 0 0 15px var(--primary-glow);
     }
 
@@ -83,7 +84,7 @@
     }
 
     .brand-title p {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
       letter-spacing: 1px;
     }
@@ -111,7 +112,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 20px;
       margin-bottom: 24px;
     }
@@ -123,13 +124,15 @@
       padding: 20px;
       backdrop-filter: blur(10px);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
     }
 
     .card-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
+      justify-content: space-between;
+      margin-bottom: 12px;
     }
 
     .card-header h3 {
@@ -138,7 +141,7 @@
       color: #fff;
     }
 
-    .card p.desc {
+    .desc {
       font-size: 0.85rem;
       color: var(--text-muted);
       margin-bottom: 14px;
@@ -163,7 +166,6 @@
     }
 
     .btn {
-      width: 100%;
       background: linear-gradient(90deg, #0099cc, var(--primary));
       border: none;
       color: #000;
@@ -173,6 +175,10 @@
       cursor: pointer;
       letter-spacing: 1px;
       transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .btn:hover {
@@ -180,9 +186,25 @@
       transform: translateY(-1px);
     }
 
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: none;
+    }
+
+    /* Radar List */
     .radar-list {
       list-style: none;
-      max-height: 220px;
+      max-height: 200px;
       overflow-y: auto;
     }
 
@@ -214,11 +236,121 @@
       color: #fff;
     }
 
+    /* Whitelist Tag Box */
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+      max-height: 120px;
+      overflow-y: auto;
+      background: rgba(3, 7, 18, 0.4);
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      min-height: 42px;
+    }
+
+    .tag {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .tag-remove {
+      cursor: pointer;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .tag-remove:hover {
+      color: var(--accent);
+    }
+
+    /* Slider UI */
+    .slider-container {
+      margin-bottom: 14px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .slider-val {
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: bold;
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--primary);
+    }
+
+    /* Radio / Toggle Group */
+    .option-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .option-btn {
+      flex: 1;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .option-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Log Box */
+    .log-list {
+      list-style: none;
+      max-height: 180px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    .log-item {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .log-item.breach {
+      color: #ff3b5c;
+    }
+
     /* Cyber Security PIN Modal */
     .cyber-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(3, 7, 18, 0.92);
+      background: rgba(3, 7, 18, 0.94);
       backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
@@ -235,7 +367,6 @@
       border-radius: 12px;
       padding: 30px 24px;
       text-align: center;
-      position: relative;
     }
 
     .cyber-shield-icon {
@@ -303,16 +434,16 @@
         </svg>
       </div>
       <h3>SECURITY ACCESS</h3>
-      <p>Paneli açmak için uzaktan erişim PIN kodunuzu girin</p>
+      <p>Enter your Remote Access PIN to decrypt panel</p>
 
       <input type="password" id="modalPinInput" maxlength="8" placeholder="••••" autocomplete="off" />
       <div id="pinErrorMsg" class="pin-error" style="display: none;"></div>
       
-      <button class="btn" onclick="submitModalPin()">KİLİDİ AÇ</button>
+      <button class="btn btn-block" onclick="submitModalPin()">UNLOCK SYSTEM</button>
     </div>
   </div>
 
-  <!-- Main Studio Dashboard -->
+  <!-- Dashboard Container -->
   <div class="container" id="mainStudio" style="display: none;">
     <header>
       <div class="brand">
@@ -329,26 +460,96 @@
     </header>
 
     <div class="grid">
+      <!-- Live Radar -->
+      <div class="card">
+        <div class="card-header">
+          <h3>LIVE RADAR</h3>
+        </div>
+        <p class="desc">Active avatars detected on parcel:</p>
+        <ul id="avatarList" class="radar-list">
+          <li class="radar-item">Scanning parcel perimeter...</li>
+        </ul>
+      </div>
+
+      <!-- Whitelist -->
+      <div class="card">
+        <div class="card-header">
+          <h3>WHITELIST ACCESS</h3>
+        </div>
+        <p class="desc">Avatars granted full immunity:</p>
+        <div id="whitelistTags" class="tag-container"></div>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="whitelistInput" class="input-field" style="margin-bottom:0;" placeholder="Avatar Name / UUID" />
+          <button class="btn" onclick="addWhitelistEntry()">ADD</button>
+        </div>
+      </div>
+
+      <!-- Security Mode & Action -->
+      <div class="card">
+        <div class="card-header">
+          <h3>DEFENSE MODE & ACTION</h3>
+        </div>
+        <p class="desc">Grid protocol and enforcement penalty:</p>
+        
+        <div class="option-group" id="modeGroup">
+          <div class="option-btn active" data-val="lockdown" onclick="setMode('lockdown')">LOCKDOWN</div>
+          <div class="option-btn" data-val="disarmed" onclick="setMode('disarmed')">DISARMED</div>
+        </div>
+
+        <div class="option-group" id="actionGroup">
+          <div class="option-btn active" data-val="eject" onclick="setAction('eject')">EJECT LAND</div>
+          <div class="option-btn" data-val="teleport" onclick="setAction('teleport')">TELEPORT HOME</div>
+        </div>
+      </div>
+
+      <!-- Countdown Setting -->
+      <div class="card">
+        <div class="card-header">
+          <h3>COUNTDOWN TIMER</h3>
+        </div>
+        <p class="desc">Grace period allowed before enforcement:</p>
+        <div class="slider-container">
+          <div class="slider-header">
+            <span>Duration</span>
+            <span class="slider-val" id="countdownVal">10s</span>
+          </div>
+          <input type="range" id="countdownRange" min="0" max="60" value="10" step="5" oninput="updateCountdownLabel(this.value)" />
+        </div>
+        <button class="btn btn-block" onclick="saveAllSettings()">SYNC WITH ORB</button>
+      </div>
+
+      <!-- Discord Webhook -->
+      <div class="card">
+        <div class="card-header">
+          <h3>DISCORD INTEGRATION</h3>
+        </div>
+        <p class="desc">Relay alerts and logs to Discord channel:</p>
+        <input type="text" id="discordInput" class="input-field" placeholder="https://discord.com/api/webhooks/..." />
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" style="flex: 1;" onclick="testDiscordWebhook()">TEST</button>
+          <button class="btn" style="flex: 1;" onclick="saveAllSettings()">SAVE</button>
+        </div>
+      </div>
+
       <!-- Remote PIN Card -->
       <div class="card">
         <div class="card-header">
-          <h3>UZAKTAN ERİŞİM PIN</h3>
+          <h3>REMOTE ACCESS PIN</h3>
         </div>
-        <p class="desc">Telefon veya başka tarayıcılardan güvenli giriş için 4-8 haneli PIN belirleyin.</p>
-        <input type="password" id="newPinInput" class="input-field" placeholder="Yeni PIN (4-8 hane)" maxlength="8" />
-        <button class="btn" onclick="saveNewPinFromUI()">PIN'İ KAYDET</button>
+        <p class="desc">Configure 4-8 digit PIN for mobile/remote login:</p>
+        <input type="password" id="newPinInput" class="input-field" placeholder="New PIN (4-8 digits)" maxlength="8" />
+        <button class="btn btn-block btn-secondary" onclick="saveNewPinFromUI()">UPDATE PIN</button>
       </div>
+    </div>
 
-      <!-- Live Radar Card -->
-      <div class="card">
-        <div class="card-header">
-          <h3>CANLI RADAR</h3>
-        </div>
-        <p class="desc">Şu anda parselde tespit edilen avatarlar:</p>
-        <ul id="avatarList" class="radar-list">
-          <li class="radar-item">Kimse tespit edilmedi...</li>
-        </ul>
+    <!-- Event Logs -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <h3>INCIDENT & VISITATION LOGS</h3>
       </div>
+      <ul id="logList" class="log-list">
+        <li class="log-item">No incident records logged yet...</li>
+      </ul>
     </div>
   </div>
 
@@ -358,6 +559,10 @@
     const urlParams = new URLSearchParams(window.location.search);
     let ownerId = urlParams.get('id') || localStorage.getItem('ice_owner_id');
     let storedPin = localStorage.getItem('ice_pin_' + ownerId) || '';
+
+    let localWhitelist = [];
+    let localMode = "lockdown";
+    let localAction = "eject";
 
     function showPinModal(err = "") {
       const modal = document.getElementById('pinModalOverlay');
@@ -383,7 +588,7 @@
 
     async function fetchStudioData() {
       if (!ownerId) {
-        alert("Lütfen linke UUID ekleyin: ?id=UUID");
+        alert("Owner ID missing in URL parameter (?id=UUID)");
         return;
       }
 
@@ -411,29 +616,161 @@
     function renderUI(data) {
       document.getElementById('subRegionInfo').innerText = `${data.parcelName || 'Parcel'} (${data.region || 'Region'})`;
       
+      // Live Radar Feed
       const listEl = document.getElementById('avatarList');
       listEl.innerHTML = "";
-
       if (!data.onlineAvatars || data.onlineAvatars.length === 0) {
-        listEl.innerHTML = "<li class='radar-item'>Parselde kimse yok.</li>";
+        listEl.innerHTML = "<li class='radar-item'>No avatars currently detected on parcel.</li>";
+      } else {
+        data.onlineAvatars.forEach(name => {
+          const li = document.createElement('li');
+          li.className = 'radar-item';
+          li.innerHTML = `
+            <span>${name}</span>
+            <button class="btn-kick" onclick="kickAvatar('${name}')">EJECT</button>
+          `;
+          listEl.appendChild(li);
+        });
+      }
+
+      // Initial Config Sync
+      const cfg = data.config || {};
+      if (cfg.whitelist && Array.isArray(cfg.whitelist)) {
+        localWhitelist = cfg.whitelist;
+        renderWhitelistTags();
+      }
+
+      if (cfg.countdown !== undefined) {
+        document.getElementById('countdownRange').value = cfg.countdown;
+        updateCountdownLabel(cfg.countdown);
+      }
+
+      if (cfg.mode) setMode(cfg.mode, false);
+      if (cfg.action) setAction(cfg.action, false);
+      if (cfg.discordWebhook) document.getElementById('discordInput').value = cfg.discordWebhook;
+
+      // Event Logs
+      if (data.visitorLogs && data.visitorLogs.length > 0) {
+        const logUl = document.getElementById('logList');
+        logUl.innerHTML = "";
+        data.visitorLogs.forEach(lg => {
+          const li = document.createElement('li');
+          li.className = `log-item ${lg.type === 'breach' ? 'breach' : ''}`;
+          li.innerHTML = `<span>[${lg.time}] ${lg.name} - ${lg.reason || lg.type}</span>`;
+          logUl.appendChild(li);
+        });
+      }
+    }
+
+    function renderWhitelistTags() {
+      const box = document.getElementById('whitelistTags');
+      box.innerHTML = "";
+      localWhitelist.forEach((name, idx) => {
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.innerHTML = `
+          <span>${name}</span>
+          <span class="tag-remove" onclick="removeWhitelistEntry(${idx})">&times;</span>
+        `;
+        box.appendChild(tag);
+      });
+    }
+
+    function addWhitelistEntry() {
+      const input = document.getElementById('whitelistInput');
+      const val = input.value.trim().toLowerCase();
+      if (!val) return;
+      if (!localWhitelist.includes(val)) {
+        localWhitelist.push(val);
+        renderWhitelistTags();
+        input.value = "";
+        saveAllSettings();
+      }
+    }
+
+    function removeWhitelistEntry(idx) {
+      localWhitelist.splice(idx, 1);
+      renderWhitelistTags();
+      saveAllSettings();
+    }
+
+    function setMode(m, triggerSave = true) {
+      localMode = m;
+      document.querySelectorAll('#modeGroup .option-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.val === m);
+      });
+      if (triggerSave) saveAllSettings();
+    }
+
+    function setAction(a, triggerSave = true) {
+      localAction = a;
+      document.querySelectorAll('#actionGroup .option-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.val === a);
+      });
+      if (triggerSave) saveAllSettings();
+    }
+
+    function updateCountdownLabel(val) {
+      document.getElementById('countdownVal').innerText = val + "s";
+    }
+
+    async function saveAllSettings() {
+      const cd = parseInt(document.getElementById('countdownRange').value) || 10;
+      const dUrl = document.getElementById('discordInput').value.trim();
+
+      const payload = {
+        ownerId: ownerId,
+        whitelist: localWhitelist,
+        mode: localMode,
+        action: localAction,
+        countdown: cd,
+        enableCountdown: cd > 0 ? 1 : 0,
+        discordWebhook: dUrl
+      };
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/settings?ownerId=${ownerId}&pin=${encodeURIComponent(storedPin)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        if (d.status === "success") {
+          console.log("Settings synced with cloud and orb.");
+        }
+      } catch (e) {
+        console.error("Save error:", e);
+      }
+    }
+
+    async function testDiscordWebhook() {
+      const dUrl = document.getElementById('discordInput').value.trim();
+      if (!dUrl) {
+        alert("Please enter a valid Discord Webhook URL first.");
         return;
       }
 
-      data.onlineAvatars.forEach(name => {
-        const li = document.createElement('li');
-        li.className = 'radar-item';
-        li.innerHTML = `
-          <span>${name}</span>
-          <button class="btn-kick" onclick="kickAvatar('${name}')">EJECT</button>
-        `;
-        listEl.appendChild(li);
-      });
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/test-discord`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ webhookUrl: dUrl, ownerId: ownerId })
+        });
+        const r = await res.json();
+        if (r.status === "success") {
+          alert("Discord test dispatch successful! Check your channel.");
+        } else {
+          alert("Discord rejection: " + (r.error || "Invalid webhook URL"));
+        }
+      } catch (e) {
+        alert("Network error transmitting Discord payload.");
+      }
     }
 
     async function submitModalPin() {
       const pinVal = document.getElementById('modalPinInput').value.trim();
       if (pinVal.length < 4) {
-        showPinModal("PIN en az 4 haneli olmalıdır.");
+        showPinModal("Security PIN must be at least 4 digits.");
         return;
       }
 
@@ -451,17 +788,17 @@
           hidePinModal();
           fetchStudioData();
         } else {
-          showPinModal("Hatalı PIN! Lütfen tekrar deneyin.");
+          showPinModal("Invalid Security PIN. Access denied.");
         }
       } catch (e) {
-        showPinModal("Bağlantı hatası oluştu.");
+        showPinModal("Network authentication failure.");
       }
     }
 
     async function saveNewPinFromUI() {
       const newPin = document.getElementById('newPinInput').value.trim();
       if (newPin.length < 4 || newPin.length > 8) {
-        alert("PIN 4 ile 8 hane arasında olmalıdır.");
+        alert("PIN length must be between 4 and 8 digits.");
         return;
       }
 
@@ -477,26 +814,26 @@
           storedPin = newPin;
           localStorage.setItem('ice_pin_' + ownerId, newPin);
           document.getElementById('newPinInput').value = "";
-          alert("Uzaktan erişim PIN kodunuz başarıyla kaydedildi!");
+          alert("Security PIN successfully updated!");
         } else {
-          alert(data.error || "PIN kaydedilemedi.");
+          alert(data.error || "Failed to update Security PIN.");
         }
       } catch (e) {
-        alert("Sunucuyla bağlantı kurulamadı.");
+        alert("Server communication error.");
       }
     }
 
     async function kickAvatar(name) {
-      if (!confirm(`${name} parselden atılsın mı?`)) return;
+      if (!confirm(`Confirm remote ejection for target: ${name}?`)) return;
       try {
         await fetch(`${BACKEND_URL}/api/manual-action`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ownerId: ownerId, targetName: name })
         });
-        alert(`${name} için eject komutu gönderildi!`);
+        alert(`Eject command dispatched for ${name}.`);
       } catch (e) {
-        alert("Komut gönderilemedi.");
+        alert("Failed to transmit manual command.");
       }
     }
 
