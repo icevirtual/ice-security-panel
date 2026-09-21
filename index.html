@@ -11,8 +11,8 @@
   <style>
     :root {
       --bg: #050811;
-      --card-bg: rgba(10, 16, 30, 0.85);
-      --card-border: rgba(0, 229, 255, 0.15);
+      --card-bg: rgba(10, 16, 30, 0.88);
+      --card-border: rgba(0, 229, 255, 0.16);
       --primary: #00e5ff;
       --primary-glow: rgba(0, 229, 255, 0.35);
       --accent: #ff0055;
@@ -20,6 +20,7 @@
       --text: #e2e8f0;
       --text-muted: #64748b;
       --success: #00e676;
+      --warning: #ffb703;
     }
 
     * {
@@ -32,8 +33,8 @@
     body {
       background-color: var(--bg);
       background-image: 
-        radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.05), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(255, 0, 85, 0.04), transparent 25%);
+        radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.06), transparent 30%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.05), transparent 30%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -44,7 +45,7 @@
 
     .container {
       width: 100%;
-      max-width: 960px;
+      max-width: 1060px;
     }
 
     header {
@@ -63,8 +64,8 @@
     }
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       background: linear-gradient(135deg, var(--primary), #0066cc);
       border-radius: 8px;
       display: flex;
@@ -72,12 +73,12 @@
       justify-content: center;
       font-weight: 700;
       color: #000;
-      font-size: 1.1rem;
-      box-shadow: 0 0 15px var(--primary-glow);
+      font-size: 1.2rem;
+      box-shadow: 0 0 16px var(--primary-glow);
     }
 
     .brand-title h1 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       letter-spacing: 2px;
       font-weight: 700;
       color: #fff;
@@ -110,11 +111,24 @@
       box-shadow: 0 0 8px var(--success);
     }
 
-    .grid {
+    .grid-top {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: 1fr 1.2fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .grid-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
       margin-bottom: 24px;
+    }
+
+    @media (max-width: 860px) {
+      .grid-top {
+        grid-template-columns: 1fr;
+      }
     }
 
     .card {
@@ -136,9 +150,19 @@
     }
 
     .card-header h3 {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       letter-spacing: 1.5px;
       color: #fff;
+    }
+
+    .card-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--primary);
+      border: 1px solid rgba(0, 229, 255, 0.25);
     }
 
     .desc {
@@ -204,7 +228,7 @@
     /* Radar List */
     .radar-list {
       list-style: none;
-      max-height: 200px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
@@ -212,18 +236,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 12px;
+      padding: 10px 12px;
       background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.04);
       border-radius: 6px;
-      margin-bottom: 6px;
-      font-size: 0.9rem;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .radar-avatar-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .radar-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
     }
 
     .btn-kick {
       background: rgba(255, 0, 85, 0.15);
       border: 1px solid rgba(255, 0, 85, 0.3);
       color: var(--accent);
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 4px;
       font-size: 0.75rem;
       cursor: pointer;
@@ -234,6 +273,65 @@
     .btn-kick:hover {
       background: var(--accent);
       color: #fff;
+    }
+
+    /* Activity Stream (Son 24 Saat Listesi) */
+    .stream-list {
+      list-style: none;
+      max-height: 250px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stream-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: 6px;
+      background: rgba(4, 9, 20, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.88rem;
+    }
+
+    .stream-item-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stream-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .stream-name {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .stream-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-visitor {
+      background: rgba(0, 230, 118, 0.12);
+      color: var(--success);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .badge-breach {
+      background: rgba(255, 0, 85, 0.14);
+      color: var(--accent);
+      border: 1px solid rgba(255, 0, 85, 0.35);
     }
 
     /* Whitelist Tag Box */
@@ -274,11 +372,7 @@
       color: var(--accent);
     }
 
-    /* Slider UI */
-    .slider-container {
-      margin-bottom: 14px;
-    }
-
+    /* Sliders & Options */
     .slider-header {
       display: flex;
       justify-content: space-between;
@@ -296,9 +390,9 @@
     input[type=range] {
       width: 100%;
       accent-color: var(--primary);
+      margin-bottom: 14px;
     }
 
-    /* Radio / Toggle Group */
     .option-group {
       display: flex;
       gap: 8px;
@@ -325,28 +419,7 @@
       color: #fff;
     }
 
-    /* Log Box */
-    .log-list {
-      list-style: none;
-      max-height: 180px;
-      overflow-y: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-    }
-
-    .log-item {
-      padding: 6px 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      justify-content: space-between;
-      color: var(--text-muted);
-    }
-
-    .log-item.breach {
-      color: #ff3b5c;
-    }
-
-    /* Cyber Security PIN Modal */
+    /* PIN Modal */
     .cyber-modal-overlay {
       position: fixed;
       inset: 0;
@@ -459,18 +532,35 @@
       </div>
     </header>
 
-    <div class="grid">
+    <!-- ÜST KISIM: Canlı Radar + 24 Saatlik Akış Yan Yana -->
+    <div class="grid-top">
       <!-- Live Radar -->
       <div class="card">
         <div class="card-header">
           <h3>LIVE RADAR</h3>
+          <span class="card-badge" id="radarCountBadge">0 ACTIVE</span>
         </div>
-        <p class="desc">Active avatars detected on parcel:</p>
+        <p class="desc">Avatars currently detected inside parcel boundaries:</p>
         <ul id="avatarList" class="radar-list">
           <li class="radar-item">Scanning parcel perimeter...</li>
         </ul>
       </div>
 
+      <!-- 24-Hour Visitors & Activity Feed -->
+      <div class="card">
+        <div class="card-header">
+          <h3>24H ACTIVITY STREAM</h3>
+          <span class="card-badge" id="totalLogsBadge">0 EVENTS</span>
+        </div>
+        <p class="desc">Real-time log of recent visitors and security interventions:</p>
+        <ul id="streamList" class="stream-list">
+          <li class="stream-item" style="color: var(--text-muted);">No entries recorded in this session.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ALT KISIM: Kontroller & Ayarlar -->
+    <div class="grid-controls">
       <!-- Whitelist -->
       <div class="card">
         <div class="card-header">
@@ -484,12 +574,12 @@
         </div>
       </div>
 
-      <!-- Security Mode & Action -->
+      <!-- Defense Mode & Action -->
       <div class="card">
         <div class="card-header">
-          <h3>DEFENSE MODE & ACTION</h3>
+          <h3>DEFENSE PROTOCOL</h3>
         </div>
-        <p class="desc">Grid protocol and enforcement penalty:</p>
+        <p class="desc">Defense state and enforcement penalty:</p>
         
         <div class="option-group" id="modeGroup">
           <div class="option-btn active" data-val="lockdown" onclick="setMode('lockdown')">LOCKDOWN</div>
@@ -508,22 +598,20 @@
           <h3>COUNTDOWN TIMER</h3>
         </div>
         <p class="desc">Grace period allowed before enforcement:</p>
-        <div class="slider-container">
-          <div class="slider-header">
-            <span>Duration</span>
-            <span class="slider-val" id="countdownVal">10s</span>
-          </div>
-          <input type="range" id="countdownRange" min="0" max="60" value="10" step="5" oninput="updateCountdownLabel(this.value)" />
+        <div class="slider-header">
+          <span>Duration</span>
+          <span class="slider-val" id="countdownVal">10s</span>
         </div>
-        <button class="btn btn-block" onclick="saveAllSettings()">SYNC WITH ORB</button>
+        <input type="range" id="countdownRange" min="0" max="60" value="10" step="5" oninput="updateCountdownLabel(this.value)" />
+        <button class="btn btn-block" onclick="saveAllSettings()">SYNC CONFIG WITH ORB</button>
       </div>
 
       <!-- Discord Webhook -->
       <div class="card">
         <div class="card-header">
-          <h3>DISCORD INTEGRATION</h3>
+          <h3>DISCORD ALERTS</h3>
         </div>
-        <p class="desc">Relay alerts and logs to Discord channel:</p>
+        <p class="desc">Webhook URL for visitor & ejection feeds:</p>
         <input type="text" id="discordInput" class="input-field" placeholder="https://discord.com/api/webhooks/..." />
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-secondary" style="flex: 1;" onclick="testDiscordWebhook()">TEST</button>
@@ -536,20 +624,10 @@
         <div class="card-header">
           <h3>REMOTE ACCESS PIN</h3>
         </div>
-        <p class="desc">Configure 4-8 digit PIN for mobile/remote login:</p>
+        <p class="desc">4-8 digit PIN for browser / mobile remote login:</p>
         <input type="password" id="newPinInput" class="input-field" placeholder="New PIN (4-8 digits)" maxlength="8" />
         <button class="btn btn-block btn-secondary" onclick="saveNewPinFromUI()">UPDATE PIN</button>
       </div>
-    </div>
-
-    <!-- Event Logs -->
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h3>INCIDENT & VISITATION LOGS</h3>
-      </div>
-      <ul id="logList" class="log-list">
-        <li class="log-item">No incident records logged yet...</li>
-      </ul>
     </div>
   </div>
 
@@ -616,24 +694,56 @@
     function renderUI(data) {
       document.getElementById('subRegionInfo').innerText = `${data.parcelName || 'Parcel'} (${data.region || 'Region'})`;
       
-      // Live Radar Feed
+      // 1. Canlı Radar Beslemesi
       const listEl = document.getElementById('avatarList');
       listEl.innerHTML = "";
-      if (!data.onlineAvatars || data.onlineAvatars.length === 0) {
-        listEl.innerHTML = "<li class='radar-item'>No avatars currently detected on parcel.</li>";
+      const online = data.onlineAvatars || [];
+      document.getElementById('radarCountBadge').innerText = `${online.length} ACTIVE`;
+
+      if (online.length === 0) {
+        listEl.innerHTML = "<li class='radar-item' style='color: var(--text-muted);'>No avatars currently detected on parcel.</li>";
       } else {
-        data.onlineAvatars.forEach(name => {
+        online.forEach(name => {
           const li = document.createElement('li');
           li.className = 'radar-item';
           li.innerHTML = `
-            <span>${name}</span>
+            <div class="radar-avatar-info">
+              <span class="radar-indicator"></span>
+              <span style="font-weight: 600;">${name}</span>
+            </div>
             <button class="btn-kick" onclick="kickAvatar('${name}')">EJECT</button>
           `;
           listEl.appendChild(li);
         });
       }
 
-      // Initial Config Sync
+      // 2. 24-Hour Activity Stream (Ziyaretçiler & Loglar)
+      const streamEl = document.getElementById('streamList');
+      streamEl.innerHTML = "";
+      const logs = data.visitorLogs || [];
+      document.getElementById('totalLogsBadge').innerText = `${logs.length} EVENTS`;
+
+      if (logs.length === 0) {
+        streamEl.innerHTML = "<li class='stream-item' style='color: var(--text-muted);'>No activity recorded yet.</li>";
+      } else {
+        logs.forEach(lg => {
+          const isBreach = (lg.type === 'breach');
+          const li = document.createElement('li');
+          li.className = 'stream-item';
+          li.innerHTML = `
+            <div class="stream-item-main">
+              <span class="stream-time">${lg.time || 'NOW'}</span>
+              <span class="stream-name">${lg.name}</span>
+            </div>
+            <span class="stream-badge ${isBreach ? 'badge-breach' : 'badge-visitor'}">
+              ${isBreach ? 'EJECTED' : 'VISITOR'}
+            </span>
+          `;
+          streamEl.appendChild(li);
+        });
+      }
+
+      // 3. Ayarlar
       const cfg = data.config || {};
       if (cfg.whitelist && Array.isArray(cfg.whitelist)) {
         localWhitelist = cfg.whitelist;
@@ -648,18 +758,6 @@
       if (cfg.mode) setMode(cfg.mode, false);
       if (cfg.action) setAction(cfg.action, false);
       if (cfg.discordWebhook) document.getElementById('discordInput').value = cfg.discordWebhook;
-
-      // Event Logs
-      if (data.visitorLogs && data.visitorLogs.length > 0) {
-        const logUl = document.getElementById('logList');
-        logUl.innerHTML = "";
-        data.visitorLogs.forEach(lg => {
-          const li = document.createElement('li');
-          li.className = `log-item ${lg.type === 'breach' ? 'breach' : ''}`;
-          li.innerHTML = `<span>[${lg.time}] ${lg.name} - ${lg.reason || lg.type}</span>`;
-          logUl.appendChild(li);
-        });
-      }
     }
 
     function renderWhitelistTags() {
