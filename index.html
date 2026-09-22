@@ -63,7 +63,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .card-title {
@@ -73,13 +73,16 @@
             letter-spacing: 1.2px;
             text-transform: uppercase;
             color: #fff;
+            display: block;
         }
 
         .card-desc {
             font-size: 0.72rem;
             color: var(--text-dim);
-            margin-top: -10px;
+            margin-top: 4px;
             margin-bottom: 12px;
+            display: block;
+            line-height: 1.2;
         }
 
         .badge {
@@ -94,7 +97,6 @@
         .badge-green { background: var(--success-dim); color: var(--success); }
         .badge-danger { background: var(--danger-dim); color: var(--danger); }
 
-        /* RADAR CARD */
         #radar-viewport {
             width: 100%;
             height: 310px;
@@ -114,7 +116,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* LIVE PRESENCE & ACTIVITY STREAM */
         .list-container {
             display: flex;
             flex-direction: column;
@@ -173,13 +174,12 @@
         }
         .stream-name { color: #fff; font-weight: 600; }
 
-        /* TAG LISTS (WHITELIST & BLACKLIST) */
         .tags-container {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
             margin-bottom: 12px;
-            min-height: 36px;
+            min-height: 32px;
         }
         .tag-pill {
             display: inline-flex;
@@ -204,10 +204,10 @@
             line-height: 1;
         }
 
-        /* INPUTS & BUTTONS */
         .input-inline {
             display: flex;
             gap: 6px;
+            margin-top: auto;
         }
         input[type="text"], input[type="password"] {
             flex: 1;
@@ -241,9 +241,7 @@
         .btn-cyan:hover { background: #33dcff; }
         .btn-danger { background: var(--danger); color: #fff; border: none; }
         .btn-danger:hover { background: #ff3377; }
-        .btn-outline-cyan { border-color: var(--accent); color: var(--accent); background: transparent; }
 
-        /* BUTTON GRIDS */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -322,9 +320,7 @@
                 <span class="card-title">Live Presence</span>
                 <span class="badge badge-cyan" id="presence-count">0 ACTIVE</span>
             </div>
-            <div class="list-container" id="presence-list">
-                <!-- Javascript ile dinamik dolar -->
-            </div>
+            <div class="list-container" id="presence-list"></div>
         </div>
 
         <!-- 3. 24H ACTIVITY STREAM -->
@@ -333,15 +329,13 @@
                 <span class="card-title">24h Activity Stream</span>
                 <span class="badge badge-cyan" id="event-count">0 EVENTS</span>
             </div>
-            <div class="list-container" id="stream-list">
-                <!-- Javascript ile dinamik dolar -->
-            </div>
+            <div class="list-container" id="stream-list"></div>
         </div>
 
         <!-- 4. WHITELIST ACCESS -->
         <div class="card">
-            <div class="card-title">Whitelist Access</div>
-            <div class="card-desc">Immunity & VIP greeting</div>
+            <span class="card-title">Whitelist Access</span>
+            <span class="card-desc">Immunity & VIP greeting</span>
             <div class="tags-container" id="whitelist-tags"></div>
             <div class="input-inline">
                 <input type="text" id="whitelist-input" placeholder="Name or UUID">
@@ -351,8 +345,8 @@
 
         <!-- 5. PERMANENT BLACKLIST -->
         <div class="card">
-            <div class="card-title">Permanent Blacklist</div>
-            <div class="card-desc">Immediate ban on detection</div>
+            <span class="card-title">Permanent Blacklist</span>
+            <span class="card-desc">Immediate ban on detection</span>
             <div class="tags-container" id="blacklist-tags"></div>
             <div class="input-inline">
                 <input type="text" id="blacklist-input" placeholder="Target Name / UUID">
@@ -362,8 +356,8 @@
 
         <!-- 6. DEFENSE PROTOCOL -->
         <div class="card">
-            <div class="card-title">Defense Protocol</div>
-            <div style="margin-top: 12px;" class="grid-2">
+            <span class="card-title" style="margin-bottom: 12px;">Defense Protocol</span>
+            <div class="grid-2">
                 <button class="btn btn-selectable active" id="btn-lockdown" onclick="setDefenseState('lockdown')">LOCKDOWN</button>
                 <button class="btn btn-selectable" id="btn-disarmed" onclick="setDefenseState('disarmed')">DISARMED</button>
             </div>
@@ -382,8 +376,8 @@
 
         <!-- 7. ALTITUDE SHIELD -->
         <div class="card">
-            <div class="card-title">Altitude Shield</div>
-            <div style="margin-top: 12px;" class="grid-3">
+            <span class="card-title" style="margin-bottom: 12px;">Altitude Shield</span>
+            <div class="grid-3">
                 <button class="btn btn-selectable active" onclick="setAltitude(this, 'all')">ALL (0-4096m)</button>
                 <button class="btn btn-selectable" onclick="setAltitude(this, 'ground')">GROUND (&lt;100m)</button>
                 <button class="btn btn-selectable" onclick="setAltitude(this, 'skybox')">SKYBOX RANGE</button>
@@ -393,21 +387,21 @@
 
         <!-- 8. ANTI-BOT AGE VERIFIER -->
         <div class="card">
-            <div class="card-title">Anti-Bot Age Verifier</div>
-            <div class="card-desc">Eject avatars newer than X days (trolls/bots)</div>
+            <span class="card-title">Anti-Bot Age Verifier</span>
+            <span class="card-desc">Eject avatars newer than X days (trolls/bots)</span>
             <input type="text" id="age-limit-input" placeholder="0 = Disabled (e.g. 14, 30 days)" style="margin-bottom: 12px;">
             <button class="btn" style="width: 100%; margin-top: auto;" onclick="saveAgeLimit()">APPLY AGE LIMIT</button>
         </div>
 
         <!-- 9. INTEGRATIONS & PIN -->
         <div class="card">
-            <div class="card-title">Integrations & PIN</div>
-            <input type="text" id="discord-hook" placeholder="https://discord.com/api/webhooks/..." style="margin-top: 10px; margin-bottom: 8px;">
+            <span class="card-title" style="margin-bottom: 8px;">Integrations & PIN</span>
+            <input type="text" id="discord-hook" placeholder="https://discord.com/api/webhooks/..." style="margin-bottom: 8px;">
             <div class="grid-2">
                 <button class="btn" onclick="testDiscord()">TEST HOOK</button>
                 <button class="btn btn-cyan" onclick="saveDiscord()">SAVE HOOK</button>
             </div>
-            <div class="input-inline" style="margin-top: 10px;">
+            <div class="input-inline" style="margin-top: 8px;">
                 <input type="password" id="remote-pin" placeholder="New Remote PIN (4-8 dig)">
                 <button class="btn" onclick="updatePin()">UPDATE PIN</button>
             </div>
@@ -429,7 +423,6 @@
             { time: "05:01 PM", name: "Devilwine Resident", type: "VISITOR", badge: "badge-green" }
         ];
 
-        // 3D Three.js Hologram Radar Kurulumu
         let scene, camera, renderer, holoCube, pointsGroup;
         const viewport = document.getElementById('radar-viewport');
 
@@ -443,13 +436,11 @@
             renderer.setSize(viewport.clientWidth, viewport.clientHeight);
             viewport.appendChild(renderer.domElement);
 
-            // Hologram Bounding Box
             const boxGeo = new THREE.BoxGeometry(160, 160, 160);
             const boxEdges = new THREE.EdgesGeometry(boxGeo);
             holoCube = new THREE.LineSegments(boxEdges, new THREE.LineBasicMaterial({ color: 0x00d2ff, opacity: 0.35, transparent: true }));
             scene.add(holoCube);
 
-            // Grid Taban
             const grid = new THREE.GridHelper(160, 8, 0x00d2ff, 0x141b27);
             grid.position.y = -80;
             scene.add(grid);
@@ -457,7 +448,6 @@
             pointsGroup = new THREE.Group();
             scene.add(pointsGroup);
 
-            // Mouse Drag Rotasyonu
             let isDragging = false, prevMouseX = 0;
             viewport.addEventListener('mousedown', e => { isDragging = true; prevMouseX = e.clientX; });
             window.addEventListener('mouseup', () => isDragging = false);
@@ -485,7 +475,6 @@
 
         initRadar();
 
-        // Render Arayüz Elemanları
         function renderWhitelist() {
             const wrap = document.getElementById('whitelist-tags');
             wrap.innerHTML = whitelist.map((item, idx) => `
@@ -514,17 +503,14 @@
             `).join('');
         }
 
-        // Backend Senkronizasyon Döngüsü
         async function fetchState() {
             try {
                 const res = await fetch(`${BACKEND_URL}/api/status/${ownerKey}`);
                 const data = await res.json();
-                
                 if (data.online) {
                     updatePresence(data.avatars || []);
                 }
             } catch (e) {
-                // Offline fallback dummy
                 updatePresence([{ name: "lludwig Resident", alt: 3404, x: 128, y: 128, z: 3404 }]);
             }
         }
@@ -533,7 +519,6 @@
             const list = document.getElementById('presence-list');
             document.getElementById('presence-count').innerText = `${avatars.length} ACTIVE`;
 
-            // Noktaları Three.js'te güncelle
             while(pointsGroup.children.length > 0) pointsGroup.remove(pointsGroup.children[0]);
 
             list.innerHTML = avatars.map(av => {
@@ -555,7 +540,6 @@
             }).join('');
         }
 
-        // Aksiyonlar
         function addWhitelist() {
             const input = document.getElementById('whitelist-input');
             if (input.value.trim()) {
@@ -636,7 +620,6 @@
             if (pin) alert("Remote PIN Updated.");
         }
 
-        // Başlangıç
         const savedHook = localStorage.getItem('ice_hook');
         if (savedHook) document.getElementById('discord-hook').value = savedHook;
 
