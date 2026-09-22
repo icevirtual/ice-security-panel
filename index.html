@@ -12,6 +12,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
+  <!-- QRCode Generator CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
     :root {
       --bg: #050811;
@@ -45,6 +48,7 @@
     header {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 24px; border-bottom: 1px solid var(--card-border); padding-bottom: 16px;
+      flex-wrap: wrap; gap: 12px;
     }
 
     .brand { display: flex; align-items: center; gap: 12px; }
@@ -56,6 +60,29 @@
     }
     .brand-title h1 { font-size: 1.6rem; letter-spacing: 2px; font-weight: 700; color: #fff; }
     .brand-title p { font-size: 0.85rem; color: var(--text-muted); }
+
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+
+    .btn-mobile-qr {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-mobile-qr:hover {
+      background: var(--primary);
+      color: #000;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
 
     .status-badge {
       display: flex; align-items: center; gap: 8px; padding: 6px 14px;
@@ -185,7 +212,7 @@
     }
     .option-btn.active { background: rgba(0, 229, 255, 0.15); border-color: var(--primary); color: #fff; }
 
-    /* Modal */
+    /* Modals */
     .cyber-modal-overlay {
       position: fixed; inset: 0; background: rgba(3, 7, 18, 0.94); backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: center; z-index: 99999;
@@ -202,6 +229,16 @@
       letter-spacing: 12px; color: var(--primary); outline: none; margin-bottom: 14px;
       font-family: 'JetBrains Mono', monospace;
     }
+
+    /* QR Code Card */
+    .qr-card-box {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 12px;
+      display: inline-block;
+      margin: 16px auto;
+      box-shadow: 0 0 25px var(--primary-glow);
+    }
   </style>
 </head>
 <body>
@@ -217,6 +254,25 @@
     </div>
   </div>
 
+  <!-- Mobile QR Code Modal -->
+  <div id="qrModalOverlay" class="cyber-modal-overlay" style="display: none;">
+    <div class="cyber-pin-card" style="max-width: 400px;">
+      <h3 style="color:#fff; margin-bottom:6px; letter-spacing:2px;">📱 MOBILE LINK</h3>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:14px;">Scan with your phone to open the live studio</p>
+      
+      <div class="qr-card-box">
+        <div id="qrcode"></div>
+      </div>
+
+      <p style="color:var(--primary); font-family:monospace; font-size:0.75rem; word-break:break-all; margin-bottom:18px;" id="mobileUrlText"></p>
+      
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="copyMobileUrl()">COPY LINK</button>
+        <button class="btn" style="flex:1;" onclick="closeQrModal()">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Studio Dashboard -->
   <div class="container" id="mainStudio" style="display: none;">
     <header>
@@ -227,9 +283,14 @@
           <p id="subRegionInfo">Autonomous Defense & 3D Spatial Surveillance</p>
         </div>
       </div>
-      <div class="status-badge">
-        <span class="status-dot"></span>
-        <span id="gatewayStatus">CORE CONNECTED</span>
+      <div class="header-actions">
+        <button class="btn-mobile-qr" onclick="openQrModal()">
+          <span>📱</span> MOBILE LINK
+        </button>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span id="gatewayStatus">CORE CONNECTED</span>
+        </div>
       </div>
     </header>
 
@@ -370,7 +431,7 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     let ownerId = (urlParams.get('id') || localStorage.getItem('ice_owner_id') || '').toLowerCase().trim();
-    let storedPin = localStorage.getItem('ice_pin_' + ownerId) || '';
+    let storedPin = urlParams.get('pin') || localStorage.getItem('ice_pin_' + ownerId) || '';
 
     let localWhitelist = [];
     let localBlacklist = [];
@@ -379,20 +440,59 @@
     let localAltMode = "all";
     let onlineAvatarsData = [];
 
+    // QR Kod Nesnesi Referansı
+    let qrCodeInstance = null;
+
+    function openQrModal() {
+      const modal = document.getElementById('qrModalOverlay');
+      const textEl = document.getElementById('mobileUrlText');
+      const qrContainer = document.getElementById('qrcode');
+      
+      // Mobilde açıldığında şifre girmekle uğraşmasın diye PIN parametresiyle oluşturulur
+      const baseUrl = window.location.origin + window.location.pathname;
+      let mobileLink = `${baseUrl}?id=${ownerId}`;
+      if (storedPin) {
+        mobileLink += `&pin=${encodeURIComponent(storedPin)}`;
+      }
+
+      textEl.innerText = mobileLink;
+      qrContainer.innerHTML = "";
+
+      qrCodeInstance = new QRCode(qrContainer, {
+        text: mobileLink,
+        width: 180,
+        height: 180,
+        colorDark: "#050811",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      modal.style.display = "flex";
+    }
+
+    function closeQrModal() {
+      document.getElementById('qrModalOverlay').style.display = "none";
+    }
+
+    function copyMobileUrl() {
+      const link = document.getElementById('mobileUrlText').innerText;
+      navigator.clipboard.writeText(link).then(() => {
+        alert("Mobile studio link copied to clipboard!");
+      });
+    }
+
     // ==========================================
     // THREE.JS 3D HOLOGRAM ENGINE
     // ==========================================
     let scene, camera, renderer, controls;
     let avatarObjects = [];
 
-    // Dinamik Avatar Nickname & İrtifa Sprite Üretici
     function makeTextSprite(text, colorStr) {
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 128;
       const ctx = canvas.getContext('2d');
 
-      // Arka plan paneli
       ctx.fillStyle = "rgba(4, 9, 20, 0.75)";
       ctx.strokeStyle = colorStr;
       ctx.lineWidth = 4;
@@ -402,7 +502,6 @@
       ctx.fill();
       ctx.stroke();
 
-      // Neon Metin
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 44px 'Rajdhani', monospace";
       ctx.textAlign = "center";
@@ -438,17 +537,14 @@
       controls.maxDistance = 600;
       controls.minDistance = 60;
 
-      // 3D Parsel Zemin Izgarası (256m x 256m ölçek)
       const gridGround = new THREE.GridHelper(200, 16, 0x00e5ff, 0x003366);
       gridGround.position.y = 0;
       scene.add(gridGround);
 
-      // Skybox Üst Izgara
       const gridCeil = new THREE.GridHelper(200, 8, 0x00e5ff, 0x001a33);
       gridCeil.position.y = 100;
       scene.add(gridCeil);
 
-      // Sınır Çerçevesi
       const boxGeo = new THREE.BoxGeometry(200, 100, 200);
       const wireGeo = new THREE.WireframeGeometry(boxGeo);
       const line = new THREE.LineSegments(wireGeo);
@@ -507,7 +603,6 @@
           const colorHex = isBan ? 0xff0055 : (isVip ? 0x00e5ff : 0x00e676);
           const colorCss = isBan ? "#ff0055" : (isVip ? "#00e5ff" : "#00e676");
 
-          // 1. Zemin Işık Huzmesi
           const lineMat = new THREE.LineBasicMaterial({
             color: colorHex,
             transparent: true,
@@ -521,14 +616,12 @@
           const heightLine = new THREE.Line(lineGeo, lineMat);
           scene.add(heightLine);
 
-          // 2. Avatar Hologram Küresi
           const sphereGeo = new THREE.SphereGeometry(3.5, 16, 16);
           const sphereMat = new THREE.MeshBasicMaterial({ color: colorHex, wireframe: false });
           const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
           sphereMesh.position.set(posX, posY, posZ);
           scene.add(sphereMesh);
 
-          // 3. 3D Nickname & İrtifa Metni (Kameraya Bakan Sprite)
           const shortName = av.name.split(" ")[0];
           const labelText = `${shortName} [${av.z}m]`;
           const textSprite = makeTextSprite(labelText, colorCss);
@@ -599,10 +692,9 @@
         });
       }
 
-      // 3D Hologram Radarını Güncelle
       if (scene) update3DAvatars(onlineAvatarsData);
 
-      // 24H Activity Stream
+      // 24H Stream
       const streamEl = document.getElementById('streamList');
       streamEl.innerHTML = "";
       const logs = data.visitorLogs || [];
@@ -629,7 +721,7 @@
         });
       }
 
-      // Settings Cache
+      // Settings
       const cfg = data.config || {};
       if (cfg.whitelist) { localWhitelist = cfg.whitelist; renderTags('whitelist'); }
       if (cfg.blacklist) { localBlacklist = cfg.blacklist; renderTags('blacklist'); }
